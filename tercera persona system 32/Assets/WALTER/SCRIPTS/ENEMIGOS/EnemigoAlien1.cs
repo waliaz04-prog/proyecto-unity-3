@@ -5,22 +5,33 @@ using UnityEngine.AI;
 public class EnemigoAlien1 : MonoBehaviour
 {
     [Header("Jugador")]
-    [SerializeField] private Transform jugador;
+    [SerializeField]
+    private Transform jugador;
 
     [Header("Movimiento")]
-    [SerializeField] private float distanciaMinima = 3f;
-    [SerializeField] private float velocidadMovimiento = 4f;
-    [SerializeField] private float aceleracion = 8f;
+    [SerializeField]
+    private float distanciaMinima = 3f;
+
+    [SerializeField]
+    private float velocidadMovimiento = 4f;
+
+    [SerializeField]
+    private float aceleracion = 8f;
 
     [Header("Rotación")]
-    [SerializeField] private float velocidadRotacion = 8f;
+    [SerializeField]
+    private float velocidadRotacion = 8f;
 
     [Header("NavMesh")]
-    [SerializeField] private float radioAgente = 0.6f;
-    [SerializeField] private float distanciaFrenado = 0f;
+    [SerializeField]
+    private float radioAgente = 0.6f;
+
+    [SerializeField]
+    private float distanciaFrenado = 0f;
 
     [Header("Debug")]
-    [SerializeField] private bool mostrarGizmos = true;
+    [SerializeField]
+    private bool mostrarGizmos = true;
 
     private NavMeshAgent agent;
 
@@ -31,9 +42,17 @@ public class EnemigoAlien1 : MonoBehaviour
         ConfigurarAgente();
     }
 
+    private void Start()
+    {
+        VerificarNavMesh();
+    }
+
     private void Update()
     {
         if (jugador == null)
+            return;
+
+        if (!agent.isOnNavMesh)
             return;
 
         float distancia =
@@ -45,7 +64,10 @@ public class EnemigoAlien1 : MonoBehaviour
         if (distancia > distanciaMinima)
         {
             agent.isStopped = false;
-            agent.SetDestination(jugador.position);
+
+            agent.SetDestination(
+                jugador.position
+            );
         }
         else
         {
@@ -57,11 +79,14 @@ public class EnemigoAlien1 : MonoBehaviour
 
     private void ConfigurarAgente()
     {
-        agent.speed = velocidadMovimiento;
+        agent.speed =
+            velocidadMovimiento;
 
-        agent.acceleration = aceleracion;
+        agent.acceleration =
+            aceleracion;
 
-        agent.radius = radioAgente;
+        agent.radius =
+            radioAgente;
 
         agent.stoppingDistance =
             distanciaFrenado;
@@ -70,6 +95,23 @@ public class EnemigoAlien1 : MonoBehaviour
 
         agent.obstacleAvoidanceType =
             ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+    }
+
+    private void VerificarNavMesh()
+    {
+        if (!agent.isOnNavMesh)
+        {
+            NavMeshHit hit;
+
+            if (NavMesh.SamplePosition(
+                transform.position,
+                out hit,
+                20f,
+                NavMesh.AllAreas))
+            {
+                agent.Warp(hit.position);
+            }
+        }
     }
 
     private void RotarHaciaJugador()
@@ -83,13 +125,16 @@ public class EnemigoAlien1 : MonoBehaviour
             return;
 
         Quaternion rotacionObjetivo =
-            Quaternion.LookRotation(direccion);
+            Quaternion.LookRotation(
+                direccion
+            );
 
         transform.rotation =
             Quaternion.Slerp(
                 transform.rotation,
                 rotacionObjetivo,
-                velocidadRotacion * Time.deltaTime
+                velocidadRotacion *
+                Time.deltaTime
             );
     }
 
