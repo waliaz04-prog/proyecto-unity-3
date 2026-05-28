@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class OleadasManager : MonoBehaviour
 {
@@ -8,9 +9,13 @@ public class OleadasManager : MonoBehaviour
     [SerializeField]
     private GameObject[] enemigosPrefabs;
 
-    [Header("Puntos Spawn")]
+    [Header("Áreas Spawn")]
     [SerializeField]
-    private Transform[] puntosSpawn;
+    private AreaSpawn[] areasSpawn;
+
+    [Header("Jugador")]
+    [SerializeField]
+    private Transform jugador;
 
     [Header("Oleadas")]
     [SerializeField]
@@ -24,6 +29,16 @@ public class OleadasManager : MonoBehaviour
 
     [SerializeField]
     private int oleadaActual = 0;
+
+    [Header("Distancias Seguridad")]
+    [SerializeField]
+    private float distanciaMinimaJugador = 20f;
+
+    [SerializeField]
+    private float radioBusquedaNavMesh = 10f;
+
+    [SerializeField]
+    private int intentosBusqueda = 20;
 
     [Header("Límites")]
     [SerializeField]
@@ -108,7 +123,7 @@ public class OleadasManager : MonoBehaviour
             CrearEnemigo();
 
             yield return new WaitForSeconds(
-                0.3f
+                0.2f
             );
         }
 
@@ -120,8 +135,16 @@ public class OleadasManager : MonoBehaviour
         if (enemigosPrefabs.Length == 0)
             return;
 
-        if (puntosSpawn.Length == 0)
+        if (areasSpawn.Length == 0)
             return;
+
+        Vector3 posicionSpawn;
+
+        if (!ObtenerPosicionValida(
+            out posicionSpawn))
+        {
+            return;
+        }
 
         GameObject prefab =
             enemigosPrefabs[
@@ -131,19 +154,11 @@ public class OleadasManager : MonoBehaviour
                 )
             ];
 
-        Transform punto =
-            puntosSpawn[
-                Random.Range(
-                    0,
-                    puntosSpawn.Length
-                )
-            ];
-
         GameObject enemigo =
             Instantiate(
                 prefab,
-                punto.position,
-                punto.rotation
+                posicionSpawn,
+                Quaternion.identity
             );
 
         enemigosVivos.Add(
@@ -173,6 +188,84 @@ public class OleadasManager : MonoBehaviour
                     );
                 };
         }
+    }
+
+    private bool ObtenerPosicionValida(
+        out Vector3 posicionFinal)
+    {
+        posicionFinal =
+            Vector3.zero;
+
+        for (int i = 0;
+             i < intentosBusqueda;
+             i++)
+        {
+            AreaSpawn area =
+                areasSpawn[
+                    Random.Range(
+                        0,
+                        areasSpawn.Length
+                    )
+                ];
+
+            Vector3 puntoAleatorio =
+                area.ObtenerPuntoAleatorio();
+
+            if (jugador != null)
+            {
+                float distanciaJugador =
+                    Vector3.Distance(
+                        jugador.position,
+                        puntoAleatorio
+                    );
+
+                if (distanciaJugador <
+                    distanciaMinimaJugador)
+                {
+                    continue;
+                }
+            }
+
+            NavMeshHit hit;
+
+            if (NavMesh.SamplePosition(
+                puntoAleatorio,
+                out hit,
+                radioBusquedaNavMesh,
+                NavMesh.AllAreas))
+            {
+                Collider[] colisiones =
+                    Physics.OverlapSphere(
+                        hit.position,
+                        1f
+                    );
+
+                bool posicionBloqueada =
+                    false;
+
+                foreach (Collider colision
+                    in colisiones)
+                {
+                    if (!colision.isTrigger)
+                    {
+                        posicionBloqueada =
+                            true;
+
+                        break;
+                    }
+                }
+
+                if (!posicionBloqueada)
+                {
+                    posicionFinal =
+                        hit.position;
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private IEnumerator EsperarFinOleada()

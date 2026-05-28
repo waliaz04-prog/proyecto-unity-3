@@ -175,12 +175,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 931fef98ed7d0974baedddc708977cf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jugador: {fileID: 0}
+  jugador: {fileID: 5992309312074546384, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
   distanciaMinima: 3
   velocidadRotacion: 8
   radioAgente: 0.6
   distanciaFrenado: 0
-  mostrarGizmos: 1
+  mostrarGizmos: 0
 --- !u!114 &-8940249476141114376
 MonoBehaviour:
   m_ObjectHideFlags: 0
