@@ -166,6 +166,7 @@ GameObject:
   - component: {fileID: 5367505355096638564}
   - component: {fileID: 5680906325920692379}
   - component: {fileID: 5023239440754898078}
+  - component: {fileID: 725074911786294335}
   m_Layer: 3
   m_Name: Cube
   m_TagString: Untagged
@@ -262,6 +263,32 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &725074911786294335
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2883580318006296932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccbd184398adc1d49bc497d5e5e1228e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tipoArma: 0
+  danio: 20
+  tiempoEntreAtaques: 0.5
+  meleeTrigger: {fileID: 0}
+  animator: {fileID: 0}
+  camaraJugador: {fileID: 5856076515346191279}
+  capaEnemigo:
+    serializedVersion: 2
+    m_Bits: 7
+  rangoDisparo: 100
+  armaAutomatica: 0
+  municion: 30
+  municionMaxima: 30
+  efectoDisparo: {fileID: 0}
 --- !u!1 &4163155319330444613
 GameObject:
   m_ObjectHideFlags: 0

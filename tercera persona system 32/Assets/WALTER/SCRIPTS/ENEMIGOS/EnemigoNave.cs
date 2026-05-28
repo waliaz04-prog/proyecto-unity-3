@@ -34,12 +34,6 @@ public class EnemigoNave : MonoBehaviour
     private float distanciaAtaque = 15f;
 
     [SerializeField]
-    private float velocidadMovimiento = 10f;
-
-    [SerializeField]
-    private float aceleracion = 20f;
-
-    [SerializeField]
     private float velocidadRotacion = 5f;
 
     [Header("NavMesh")]
@@ -85,6 +79,8 @@ public class EnemigoNave : MonoBehaviour
 
     private NavMeshAgent agent;
 
+    private StatsEnemigo stats;
+
     private Vector3 destinoActual;
 
     private float timerDestino;
@@ -96,7 +92,11 @@ public class EnemigoNave : MonoBehaviour
 
     private void Awake()
     {
-        agent = GetComponent<NavMeshAgent>();
+        agent =
+            GetComponent<NavMeshAgent>();
+
+        stats =
+            GetComponent<StatsEnemigo>();
 
         ConfigurarAgente();
     }
@@ -147,11 +147,14 @@ public class EnemigoNave : MonoBehaviour
 
     private void ConfigurarAgente()
     {
-        agent.speed =
-            velocidadMovimiento;
+        if (stats != null)
+        {
+            agent.speed =
+                stats.VelocidadMovimiento;
 
-        agent.acceleration =
-            aceleracion;
+            agent.acceleration =
+                stats.Aceleracion;
+        }
 
         agent.radius =
             radioAgente;

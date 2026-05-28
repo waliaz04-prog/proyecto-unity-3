@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6550974619502001663}
   - component: {fileID: 5346420990263116140}
   - component: {fileID: 9207702655696790788}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -122,9 +122,11 @@ GameObject:
   - component: {fileID: 6023123391168571385}
   - component: {fileID: 7035641774572788344}
   - component: {fileID: 346689386125804135}
+  - component: {fileID: 322722853535169121}
   - component: {fileID: 1604624168748765444}
   - component: {fileID: 8210465454365242615}
-  m_Layer: 0
+  - component: {fileID: -4567137310876257870}
+  m_Layer: 7
   m_Name: nave prototipo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -223,6 +225,33 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+--- !u!54 &322722853535169121
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7779461994463829144}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!195 &1604624168748765444
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -258,16 +287,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   jugador: {fileID: 1358631215731323716, guid: 1dfe9561d01881c4d91055ecd977e1f0, type: 3}
+  modeloVisual: {fileID: 8394066093993466119}
+  alturaVisual: 12
   zonaVuelo: {fileID: 4106291306479635218, guid: c54d7054660c3cf44a889e384a919b05, type: 3}
   distanciaParaNuevoPunto: 5
   tiempoActualizarDestino: 3
   distanciaDeteccion: 30
   distanciaAtaque: 15
-  velocidadMovimiento: 10
-  aceleracion: 20
   velocidadRotacion: 5
-  alturaVuelo: 12
   radioAgente: 2
+  calidadAvoidance: 4
   proyectilPrefab: {fileID: 0}
   puntoDisparo: {fileID: 0}
   tiempoEntreDisparos: 2
@@ -278,3 +307,32 @@ MonoBehaviour:
   maximoPorNave: 10
   maximoPorHorda: 30
   mostrarGizmos: 1
+--- !u!114 &-4567137310876257870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7779461994463829144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 517ffce5ca9e12b4089106806853fe2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vidaBase: 100
+  vidaActual: 0
+  danioBase: 10
+  velocidadAtaqueBase: 1
+  velocidadMovimientoBase: 4
+  aceleracionBase: 8
+  resistenciaBase: 0
+  aumentoVida: 0.15
+  aumentoDanio: 0.1
+  aumentoAtaque: 0.05
+  aumentoAceleracion: 0.05
+  aumentoResistencia: 0.03
+  danioActual: 0
+  velocidadAtaqueActual: 0
+  velocidadMovimientoActual: 0
+  aceleracionActual: 0
+  resistenciaActual: 0
