@@ -5,41 +5,36 @@ using UnityEngine.AI;
 public class EnemigoAlien1 : MonoBehaviour
 {
     [Header("Jugador")]
-    [SerializeField]
-    private Transform jugador;
+    [SerializeField] private Transform jugador;
 
     [Header("Movimiento")]
-    [SerializeField]
-    private float distanciaMinima = 3f;
+    [SerializeField] private float distanciaMinima = 3f;
+    [SerializeField] private float velocidadMovimiento = 4f;
+    [SerializeField] private float aceleracion = 8f;
 
     [Header("Rotación")]
-    [SerializeField]
-    private float velocidadRotacion = 8f;
+    [SerializeField] private float velocidadRotacion = 8f;
 
     [Header("NavMesh")]
-    [SerializeField]
-    private float radioAgente = 0.6f;
-
-    [SerializeField]
-    private float distanciaFrenado = 0f;
+    [SerializeField] private float radioAgente = 0.6f;
 
     [Header("Debug")]
-    [SerializeField]
-    private bool mostrarGizmos = true;
+    [SerializeField] private bool mostrarGizmos = true;
 
     private NavMeshAgent agent;
 
-    private StatsEnemigo stats;
-
     private void Awake()
     {
-        agent =
-            GetComponent<NavMeshAgent>();
+        agent = GetComponent<NavMeshAgent>();
 
-        stats =
-            GetComponent<StatsEnemigo>();
+        agent.speed = velocidadMovimiento;
+        agent.acceleration = aceleracion;
+        agent.radius = radioAgente;
+        agent.updateRotation = false;
+        agent.obstacleAvoidanceType =
+            ObstacleAvoidanceType.HighQualityObstacleAvoidance;
 
-        ConfigurarAgente();
+        BuscarJugador();
     }
 
     private void Start()
@@ -50,7 +45,10 @@ public class EnemigoAlien1 : MonoBehaviour
     private void Update()
     {
         if (jugador == null)
+        {
+            BuscarJugador();
             return;
+        }
 
         if (!agent.isOnNavMesh)
             return;
@@ -64,10 +62,7 @@ public class EnemigoAlien1 : MonoBehaviour
         if (distancia > distanciaMinima)
         {
             agent.isStopped = false;
-
-            agent.SetDestination(
-                jugador.position
-            );
+            agent.SetDestination(jugador.position);
         }
         else
         {
@@ -77,27 +72,15 @@ public class EnemigoAlien1 : MonoBehaviour
         RotarHaciaJugador();
     }
 
-    private void ConfigurarAgente()
+    private void BuscarJugador()
     {
-        if (stats != null)
+        GameObject player =
+            GameObject.FindGameObjectWithTag("Player");
+
+        if (player != null)
         {
-            agent.speed =
-                stats.VelocidadMovimiento;
-
-            agent.acceleration =
-                stats.Aceleracion;
+            jugador = player.transform;
         }
-
-        agent.radius =
-            radioAgente;
-
-        agent.stoppingDistance =
-            distanciaFrenado;
-
-        agent.updateRotation = false;
-
-        agent.obstacleAvoidanceType =
-            ObstacleAvoidanceType.HighQualityObstacleAvoidance;
     }
 
     private void VerificarNavMesh()
@@ -124,20 +107,17 @@ public class EnemigoAlien1 : MonoBehaviour
 
         direccion.y = 0f;
 
-        if (direccion == Vector3.zero)
+        if (direccion.sqrMagnitude < 0.01f)
             return;
 
         Quaternion rotacionObjetivo =
-            Quaternion.LookRotation(
-                direccion
-            );
+            Quaternion.LookRotation(direccion);
 
         transform.rotation =
             Quaternion.Slerp(
                 transform.rotation,
                 rotacionObjetivo,
-                velocidadRotacion *
-                Time.deltaTime
+                velocidadRotacion * Time.deltaTime
             );
     }
 
@@ -147,7 +127,6 @@ public class EnemigoAlien1 : MonoBehaviour
             return;
 
         Gizmos.color = Color.red;
-
         Gizmos.DrawWireSphere(
             transform.position,
             distanciaMinima

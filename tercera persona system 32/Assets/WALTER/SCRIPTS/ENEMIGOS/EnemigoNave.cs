@@ -6,25 +6,20 @@ using UnityEngine.AI;
 public class EnemigoNave : MonoBehaviour
 {
     [Header("Jugador")]
-    [SerializeField]
-    private Transform jugador;
+    [SerializeField] private Transform jugador;
 
     [Header("Visual")]
-    [SerializeField]
-    private Transform modeloVisual;
-
-    [SerializeField]
-    private float alturaVisual = 12f;
+    [SerializeField] private Transform modeloVisual;
+    [SerializeField] private float alturaVisual = 10f;
 
     [Header("Zona de Vuelo")]
-    [SerializeField]
-    private ZonaVueloNaves zonaVuelo;
+    [SerializeField] private ZonaVueloNaves zonaVuelo;
 
     [SerializeField]
-    private float distanciaParaNuevoPunto = 5f;
+    private float distanciaParaNuevoDestino = 5f;
 
     [SerializeField]
-    private float tiempoActualizarDestino = 3f;
+    private float tiempoMaximoDestino = 5f;
 
     [Header("Movimiento")]
     [SerializeField]
@@ -34,6 +29,12 @@ public class EnemigoNave : MonoBehaviour
     private float distanciaAtaque = 15f;
 
     [SerializeField]
+    private float velocidadMovimiento = 8f;
+
+    [SerializeField]
+    private float aceleracion = 20f;
+
+    [SerializeField]
     private float velocidadRotacion = 5f;
 
     [Header("NavMesh")]
@@ -41,7 +42,7 @@ public class EnemigoNave : MonoBehaviour
     private float radioAgente = 2f;
 
     [SerializeField]
-    private ObstacleAvoidanceType calidadAvoidance =
+    private ObstacleAvoidanceType obstacleAvoidance =
         ObstacleAvoidanceType.HighQualityObstacleAvoidance;
 
     [Header("Ataque")]
@@ -62,7 +63,7 @@ public class EnemigoNave : MonoBehaviour
     private Transform puntoSpawn;
 
     [SerializeField]
-    private float tiempoAntesDeGenerar = 10f;
+    private float tiempoAntesGenerar = 10f;
 
     [SerializeField]
     private float tiempoEntreSpawns = 5f;
@@ -79,8 +80,6 @@ public class EnemigoNave : MonoBehaviour
 
     private NavMeshAgent agent;
 
-    private StatsEnemigo stats;
-
     private Vector3 destinoActual;
 
     private float timerDestino;
@@ -92,13 +91,11 @@ public class EnemigoNave : MonoBehaviour
 
     private void Awake()
     {
-        agent =
-            GetComponent<NavMeshAgent>();
-
-        stats =
-            GetComponent<StatsEnemigo>();
+        agent = GetComponent<NavMeshAgent>();
 
         ConfigurarAgente();
+
+        BuscarJugador();
     }
 
     private void Start()
@@ -113,7 +110,10 @@ public class EnemigoNave : MonoBehaviour
     private void Update()
     {
         if (jugador == null)
+        {
+            BuscarJugador();
             return;
+        }
 
         if (!agent.isOnNavMesh)
             return;
@@ -143,28 +143,37 @@ public class EnemigoNave : MonoBehaviour
         RotarHaciaMovimiento();
     }
 
-    #region CONFIGURACIÓN
+    #region Jugador
+
+    private void BuscarJugador()
+    {
+        GameObject player =
+            GameObject.FindGameObjectWithTag("Player");
+
+        if (player != null)
+        {
+            jugador = player.transform;
+        }
+    }
+
+    #endregion
+
+    #region Configuración
 
     private void ConfigurarAgente()
     {
-        if (stats != null)
-        {
-            agent.speed =
-                stats.VelocidadMovimiento;
+        agent.speed = velocidadMovimiento;
 
-            agent.acceleration =
-                stats.Aceleracion;
-        }
+        agent.acceleration = aceleracion;
 
-        agent.radius =
-            radioAgente;
+        agent.radius = radioAgente;
 
         agent.updateRotation = false;
 
         agent.updateUpAxis = false;
 
         agent.obstacleAvoidanceType =
-            calidadAvoidance;
+            obstacleAvoidance;
     }
 
     private void VerificarNavMesh()
@@ -186,13 +195,10 @@ public class EnemigoNave : MonoBehaviour
 
     #endregion
 
-    #region MOVIMIENTO
+    #region Movimiento
 
     private void SeguirJugador()
     {
-        if (!agent.isOnNavMesh)
-            return;
-
         agent.SetDestination(
             jugador.position
         );
@@ -211,15 +217,13 @@ public class EnemigoNave : MonoBehaviour
                 destinoActual
             );
 
-        if (distancia <= distanciaParaNuevoPunto ||
-            timerDestino >= tiempoActualizarDestino)
+        if (distancia <= distanciaParaNuevoDestino ||
+            timerDestino >= tiempoMaximoDestino)
         {
             GenerarNuevoDestino();
         }
 
-        agent.SetDestination(
-            destinoActual
-        );
+        agent.SetDestination(destinoActual);
     }
 
     private void GenerarNuevoDestino()
@@ -246,14 +250,13 @@ public class EnemigoNave : MonoBehaviour
         if (modeloVisual == null)
             return;
 
-        Vector3 posicionLocal =
+        Vector3 posicion =
             modeloVisual.localPosition;
 
-        posicionLocal.y =
-            alturaVisual;
+        posicion.y = alturaVisual;
 
         modeloVisual.localPosition =
-            posicionLocal;
+            posicion;
     }
 
     private void RotarHaciaMovimiento()
@@ -263,7 +266,7 @@ public class EnemigoNave : MonoBehaviour
 
         direccion.y = 0f;
 
-        if (direccion.sqrMagnitude < 0.1f)
+        if (direccion.sqrMagnitude < 0.01f)
             return;
 
         Quaternion rotacionObjetivo =
@@ -282,14 +285,13 @@ public class EnemigoNave : MonoBehaviour
 
     #endregion
 
-    #region ATAQUE
+    #region Ataque
 
     private void AtacarJugador()
     {
         timerDisparo += Time.deltaTime;
 
-        if (timerDisparo >=
-            tiempoEntreDisparos)
+        if (timerDisparo >= tiempoEntreDisparos)
         {
             timerDisparo = 0f;
 
@@ -307,12 +309,12 @@ public class EnemigoNave : MonoBehaviour
 
     #endregion
 
-    #region SPAWN
+    #region Spawn
 
     private IEnumerator IniciarSpawn()
     {
         yield return new WaitForSeconds(
-            tiempoAntesDeGenerar
+            tiempoAntesGenerar
         );
 
         while (enemigosGenerados <
@@ -332,8 +334,10 @@ public class EnemigoNave : MonoBehaviour
 
     private void CrearEnemigo()
     {
-        if (enemigoPrefab == null ||
-            puntoSpawn == null)
+        if (enemigoPrefab == null)
+            return;
+
+        if (puntoSpawn == null)
             return;
 
         NavMeshHit hit;
@@ -369,11 +373,16 @@ public class EnemigoNave : MonoBehaviour
     private void ReducirContador()
     {
         enemigosTotalesVivos--;
+
+        if (enemigosTotalesVivos < 0)
+        {
+            enemigosTotalesVivos = 0;
+        }
     }
 
     #endregion
 
-    #region GIZMOS
+    #region Gizmos
 
     private void OnDrawGizmosSelected()
     {
