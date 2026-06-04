@@ -167,6 +167,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7525855898209256558, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9054212264162514268, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
       propertyPath: m_Name
       value: Player
@@ -174,7 +178,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1759085986311853551, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 233128503}
   m_SourcePrefab: {fileID: 100100000, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
 --- !u!1 &221097089
 GameObject:
@@ -255,6 +262,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &233128501 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1759085986311853551, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
+  m_PrefabInstance: {fileID: 209579538}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &233128503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 233128501}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d70fd61ca5c74b4a917c20262437056, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  danio: 10
+  balasPorDisparo: 1
+  tiempoEntreDisparos: 0.2
+  alcance: 100
+  dispersion: 0
+  usarMunicion: 1
+  municionActual: 30
+  municionMaxima: 30
+  camaraJugador: {fileID: 1725350623}
+  capasImpacto:
+    serializedVersion: 2
+    m_Bits: 128
+  efectoDisparo: {fileID: 0}
+  mostrarLogs: 0
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -1126,6 +1164,11 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 0, z: 0}
   m_TimeToStationary: 0.5
+--- !u!20 &1725350623 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 2483376445309457314, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
+  m_PrefabInstance: {fileID: 209579538}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1765874980
 GameObject:
   m_ObjectHideFlags: 0
@@ -1672,6 +1715,7 @@ SceneRoots:
   - {fileID: 5678088864186251906}
   - {fileID: 3121561850140179411}
   - {fileID: 6627146368043885670}
+  - {fileID: 221097092}
   - {fileID: 869628921}
   - {fileID: 209579538}
   - {fileID: 4520746093722899460}
@@ -1684,4 +1728,3 @@ SceneRoots:
   - {fileID: 7277738227143598108}
   - {fileID: 1343043568323659785}
   - {fileID: 1025921013}
-  - {fileID: 221097092}

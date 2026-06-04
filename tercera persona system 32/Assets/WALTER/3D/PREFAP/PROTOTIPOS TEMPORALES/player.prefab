@@ -427,7 +427,7 @@ GameObject:
   - component: {fileID: 2112330049133463319}
   - component: {fileID: 2934017864644460271}
   m_Layer: 3
-  m_Name: Player
+  m_Name: player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -449,6 +449,7 @@ Transform:
   - {fileID: 5334151252166088420}
   - {fileID: 5498831198107903692}
   - {fileID: 642764810291661600}
+  - {fileID: 1378760982327463765}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6892132668108420664
@@ -605,3 +606,69 @@ MonoBehaviour:
   escudoMaximo: 100
   tiempoAntesRegenerar: 4
   velocidadRegeneracion: 20
+--- !u!1001 &1488702131751971006
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 5992309312074546384}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.6127162
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.27949995
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.4866819
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071079
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7071057
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      propertyPath: m_Name
+      value: pistola chida
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+--- !u!4 &1378760982327463765 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+  m_PrefabInstance: {fileID: 1488702131751971006}
+  m_PrefabAsset: {fileID: 0}
