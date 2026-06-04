@@ -5,32 +5,32 @@ using UnityEngine.AI;
 
 public class OleadasManager : MonoBehaviour
 {
-    [Header("Prefabs")]
+    [Header("Jugador")]
     [SerializeField]
-    private GameObject[] enemigosPrefabs;
+    private Transform jugador;
 
     [Header("Áreas Spawn")]
     [SerializeField]
     private AreaSpawn[] areasSpawn;
 
-    [Header("Jugador")]
+    [Header("Pool")]
     [SerializeField]
-    private Transform jugador;
+    private string idPoolAlien = "alien";
 
     [Header("Oleadas")]
     [SerializeField]
-    private int enemigosIniciales = 5;
+    private int enemigosIniciales = 10;
 
     [SerializeField]
     private int incrementoPorOleada = 3;
 
     [SerializeField]
-    private float tiempoEntreOleadas = 10f;
+    private float tiempoEntreOleadas = 15f;
 
     [SerializeField]
-    private int oleadaActual = 0;
+    private float tiempoEntreSpawns = 0.15f;
 
-    [Header("Distancias Seguridad")]
+    [Header("Distancias")]
     [SerializeField]
     private float distanciaMinimaJugador = 20f;
 
@@ -42,16 +42,19 @@ public class OleadasManager : MonoBehaviour
 
     [Header("Límites")]
     [SerializeField]
-    private int maximoEnemigosSimultaneos = 100;
+    private int maximoEnemigosSimultaneos = 250;
 
     [Header("Debug")]
     [SerializeField]
-    private bool mostrarLogs = true;
+    private bool mostrarLogs = false;
 
-    private readonly List<GameObject> enemigosVivos =
-        new List<GameObject>();
+    private readonly List<GameObject>
+        enemigosVivos =
+            new List<GameObject>();
 
     private bool generandoOleada;
+
+    private int oleadaActual;
 
     public int OleadaActual =>
         oleadaActual;
@@ -65,7 +68,9 @@ public class OleadasManager : MonoBehaviour
 
     private IEnumerator BucleOleadas()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(
+            2f
+        );
 
         while (true)
         {
@@ -97,10 +102,20 @@ public class OleadasManager : MonoBehaviour
 
         oleadaActual++;
 
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance
+                .CambiarOleada(
+                    oleadaActual
+                );
+        }
+
         int cantidadEnemigos =
             enemigosIniciales +
-            ((oleadaActual - 1) *
-             incrementoPorOleada);
+            (
+                (oleadaActual - 1)
+                * incrementoPorOleada
+            );
 
         cantidadEnemigos =
             Mathf.Min(
@@ -111,19 +126,18 @@ public class OleadasManager : MonoBehaviour
         if (mostrarLogs)
         {
             Debug.Log(
-                "Iniciando Oleada: " +
-                oleadaActual +
-                " | Enemigos: " +
-                cantidadEnemigos
+                $"Oleada {oleadaActual} - Enemigos {cantidadEnemigos}"
             );
         }
 
-        for (int i = 0; i < cantidadEnemigos; i++)
+        for (int i = 0;
+             i < cantidadEnemigos;
+             i++)
         {
             CrearEnemigo();
 
             yield return new WaitForSeconds(
-                0.2f
+                tiempoEntreSpawns
             );
         }
 
@@ -132,10 +146,7 @@ public class OleadasManager : MonoBehaviour
 
     private void CrearEnemigo()
     {
-        if (enemigosPrefabs.Length == 0)
-            return;
-
-        if (areasSpawn.Length == 0)
+        if (PoolManager.Instance == null)
             return;
 
         Vector3 posicionSpawn;
@@ -146,20 +157,16 @@ public class OleadasManager : MonoBehaviour
             return;
         }
 
-        GameObject prefab =
-            enemigosPrefabs[
-                Random.Range(
-                    0,
-                    enemigosPrefabs.Length
-                )
-            ];
-
         GameObject enemigo =
-            Instantiate(
-                prefab,
+            PoolManager.Instance
+            .ObtenerObjeto(
+                idPoolAlien,
                 posicionSpawn,
                 Quaternion.identity
             );
+
+        if (enemigo == null)
+            return;
 
         enemigosVivos.Add(
             enemigo
@@ -176,18 +183,26 @@ public class OleadasManager : MonoBehaviour
         }
 
         ControladorEnemigo controlador =
-            enemigo.GetComponent<ControladorEnemigo>();
+            enemigo.GetComponent
+            <ControladorEnemigo>();
 
         if (controlador != null)
         {
+            controlador.OnEnemyDeath -=
+                ActualizarListaEnemigos;
+
             controlador.OnEnemyDeath +=
-                () =>
-                {
-                    enemigosVivos.Remove(
-                        enemigo
-                    );
-                };
+                ActualizarListaEnemigos;
         }
+    }
+
+    private void ActualizarListaEnemigos()
+    {
+        enemigosVivos.RemoveAll(
+            enemigo =>
+                enemigo == null ||
+                !enemigo.activeInHierarchy
+        );
     }
 
     private bool ObtenerPosicionValida(
@@ -195,6 +210,9 @@ public class OleadasManager : MonoBehaviour
     {
         posicionFinal =
             Vector3.zero;
+
+        if (areasSpawn.Length == 0)
+            return false;
 
         for (int i = 0;
              i < intentosBusqueda;
@@ -208,18 +226,18 @@ public class OleadasManager : MonoBehaviour
                     )
                 ];
 
-            Vector3 puntoAleatorio =
+            Vector3 punto =
                 area.ObtenerPuntoAleatorio();
 
             if (jugador != null)
             {
-                float distanciaJugador =
+                float distancia =
                     Vector3.Distance(
                         jugador.position,
-                        puntoAleatorio
+                        punto
                     );
 
-                if (distanciaJugador <
+                if (distancia <
                     distanciaMinimaJugador)
                 {
                     continue;
@@ -229,39 +247,15 @@ public class OleadasManager : MonoBehaviour
             NavMeshHit hit;
 
             if (NavMesh.SamplePosition(
-                puntoAleatorio,
+                punto,
                 out hit,
                 radioBusquedaNavMesh,
                 NavMesh.AllAreas))
             {
-                Collider[] colisiones =
-                    Physics.OverlapSphere(
-                        hit.position,
-                        1f
-                    );
+                posicionFinal =
+                    hit.position;
 
-                bool posicionBloqueada =
-                    false;
-
-                foreach (Collider colision
-                    in colisiones)
-                {
-                    if (!colision.isTrigger)
-                    {
-                        posicionBloqueada =
-                            true;
-
-                        break;
-                    }
-                }
-
-                if (!posicionBloqueada)
-                {
-                    posicionFinal =
-                        hit.position;
-
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -270,11 +264,15 @@ public class OleadasManager : MonoBehaviour
 
     private IEnumerator EsperarFinOleada()
     {
-        while (enemigosVivos.Count > 0 ||
-               generandoOleada)
+        while (
+            enemigosVivos.Count > 0 ||
+            generandoOleada
+        )
         {
             enemigosVivos.RemoveAll(
-                enemigo => enemigo == null
+                enemigo =>
+                    enemigo == null ||
+                    !enemigo.activeInHierarchy
             );
 
             yield return null;

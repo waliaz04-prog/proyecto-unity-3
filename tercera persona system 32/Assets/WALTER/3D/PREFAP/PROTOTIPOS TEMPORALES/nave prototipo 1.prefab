@@ -126,6 +126,7 @@ GameObject:
   - component: {fileID: 1615114051402749701}
   - component: {fileID: 8205455537715999478}
   - component: {fileID: 4661375501725939635}
+  - component: {fileID: 7353547253754505695}
   m_Layer: 7
   m_Name: nave prototipo 1
   m_TagString: Untagged
@@ -291,19 +292,21 @@ MonoBehaviour:
   modeloVisual: {fileID: 8382177616445906694}
   alturaVisual: 12
   zonaVuelo: {fileID: 4106291306479635218, guid: c54d7054660c3cf44a889e384a919b05, type: 3}
-  distanciaParaNuevoPunto: 5
-  tiempoActualizarDestino: 3
+  distanciaParaNuevoDestino: 5
+  tiempoMaximoDestino: 5
   distanciaDeteccion: 30
   distanciaAtaque: 15
+  velocidadMovimiento: 8
+  aceleracion: 20
   velocidadRotacion: 5
   radioAgente: 2
-  calidadAvoidance: 4
+  obstacleAvoidance: 4
   proyectilPrefab: {fileID: 1749955992947796215, guid: 04e2739e9a7f76446b6b3a61a2228933, type: 3}
   puntoDisparo: {fileID: 1033263451334692632}
   tiempoEntreDisparos: 2
   enemigoPrefab: {fileID: 8272684473738788310, guid: 4c25502222748ad4ebd47329b631edf5, type: 3}
   puntoSpawn: {fileID: 1033263451334692632}
-  tiempoAntesDeGenerar: 10
+  tiempoAntesGenerar: 10
   tiempoEntreSpawns: 5
   maximoPorNave: 10
   maximoPorHorda: 30
@@ -327,6 +330,7 @@ MonoBehaviour:
   velocidadMovimientoBase: 4
   aceleracionBase: 8
   resistenciaBase: 0
+  puntosBase: 10
   aumentoVida: 0.15
   aumentoDanio: 0.1
   aumentoAtaque: 0.05
@@ -337,6 +341,20 @@ MonoBehaviour:
   velocidadMovimientoActual: 0
   aceleracionActual: 0
   resistenciaActual: 0
+--- !u!114 &7353547253754505695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7771242586143431321}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17f66e5c60116194f80d7d26584986e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tipoEnemigo: 1
+  destruirAlMorir: 1
 --- !u!1 &7792223504209502495
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,10 +2,14 @@ using UnityEngine;
 
 public class AreaSpawn : MonoBehaviour
 {
-    [Header("Tamaño Área")]
+    [Header("Tamaño del Área")]
     [SerializeField]
     private Vector3 tamañoArea =
-        new Vector3(20f, 5f, 20f);
+        new Vector3(
+            30f,
+            5f,
+            30f
+        );
 
     [Header("Debug")]
     [SerializeField]
@@ -16,22 +20,33 @@ public class AreaSpawn : MonoBehaviour
         Vector3 centro =
             transform.position;
 
-        Vector3 puntoAleatorio =
-            new Vector3(
-                Random.Range(
-                    centro.x - tamañoArea.x / 2f,
-                    centro.x + tamañoArea.x / 2f
-                ),
-
-                centro.y,
-
-                Random.Range(
-                    centro.z - tamañoArea.z / 2f,
-                    centro.z + tamañoArea.z / 2f
-                )
+        float randomX =
+            Random.Range(
+                -tamañoArea.x * 0.5f,
+                tamañoArea.x * 0.5f
             );
 
-        return puntoAleatorio;
+        float randomZ =
+            Random.Range(
+                -tamañoArea.z * 0.5f,
+                tamañoArea.z * 0.5f
+            );
+
+        return new Vector3(
+            centro.x + randomX,
+            centro.y,
+            centro.z + randomZ
+        );
+    }
+
+    public Vector3 ObtenerCentro()
+    {
+        return transform.position;
+    }
+
+    public Vector3 ObtenerTamano()
+    {
+        return tamañoArea;
     }
 
     private void OnDrawGizmos()
@@ -40,7 +55,12 @@ public class AreaSpawn : MonoBehaviour
             return;
 
         Gizmos.color =
-            new Color(0f, 1f, 0f, 0.3f);
+            new Color(
+                0f,
+                1f,
+                0f,
+                0.25f
+            );
 
         Gizmos.DrawCube(
             transform.position,

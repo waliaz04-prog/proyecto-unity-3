@@ -5,40 +5,60 @@ using UnityEngine.AI;
 public class EnemigoAlien1 : MonoBehaviour
 {
     [Header("Jugador")]
-    [SerializeField] private Transform jugador;
+    [SerializeField]
+    private Transform jugador;
 
     [Header("Movimiento")]
-    [SerializeField] private float distanciaMinima = 3f;
-    [SerializeField] private float velocidadMovimiento = 4f;
-    [SerializeField] private float aceleracion = 8f;
+    [SerializeField]
+    private float distanciaMinima = 2.5f;
+
+    [SerializeField]
+    private float frecuenciaActualizacionRuta = 0.2f;
+
+    [SerializeField]
+    private float velocidadMovimiento = 4f;
+
+    [SerializeField]
+    private float aceleracion = 8f;
 
     [Header("Rotación")]
-    [SerializeField] private float velocidadRotacion = 8f;
+    [SerializeField]
+    private float velocidadRotacion = 8f;
 
     [Header("NavMesh")]
-    [SerializeField] private float radioAgente = 0.6f;
+    [SerializeField]
+    private float radioAgente = 0.6f;
+
+    [SerializeField]
+    private float distanciaWarpNavMesh = 20f;
 
     [Header("Debug")]
-    [SerializeField] private bool mostrarGizmos = true;
+    [SerializeField]
+    private bool mostrarGizmos = true;
 
     private NavMeshAgent agent;
 
+    private float timerRuta;
+
     private void Awake()
     {
-        agent = GetComponent<NavMeshAgent>();
+        agent =
+            GetComponent<NavMeshAgent>();
 
-        agent.speed = velocidadMovimiento;
-        agent.acceleration = aceleracion;
-        agent.radius = radioAgente;
-        agent.updateRotation = false;
-        agent.obstacleAvoidanceType =
-            ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+        ConfigurarAgente();
 
         BuscarJugador();
     }
 
-    private void Start()
+    private void OnEnable()
     {
+        timerRuta = 0f;
+
+        if (agent != null)
+        {
+            agent.enabled = true;
+        }
+
         VerificarNavMesh();
     }
 
@@ -53,33 +73,76 @@ public class EnemigoAlien1 : MonoBehaviour
         if (!agent.isOnNavMesh)
             return;
 
+        ActualizarMovimiento();
+
+        RotarHaciaJugador();
+    }
+
+    private void ConfigurarAgente()
+    {
+        agent.speed =
+            velocidadMovimiento;
+
+        agent.acceleration =
+            aceleracion;
+
+        agent.radius =
+            radioAgente;
+
+        agent.updateRotation =
+            false;
+
+        agent.updateUpAxis =
+            false;
+    }
+
+    private void ActualizarMovimiento()
+    {
+        timerRuta +=
+            Time.deltaTime;
+
+        if (timerRuta <
+            frecuenciaActualizacionRuta)
+        {
+            return;
+        }
+
+        timerRuta = 0f;
+
         float distancia =
             Vector3.Distance(
                 transform.position,
                 jugador.position
             );
 
-        if (distancia > distanciaMinima)
+        if (distancia >
+            distanciaMinima)
         {
-            agent.isStopped = false;
-            agent.SetDestination(jugador.position);
+            agent.isStopped =
+                false;
+
+            agent.SetDestination(
+                jugador.position
+            );
         }
         else
         {
-            agent.isStopped = true;
+            agent.isStopped =
+                true;
         }
-
-        RotarHaciaJugador();
     }
 
     private void BuscarJugador()
     {
         GameObject player =
-            GameObject.FindGameObjectWithTag("Player");
+            GameObject.FindGameObjectWithTag(
+                "Player"
+            );
 
         if (player != null)
         {
-            jugador = player.transform;
+            jugador =
+                player.transform;
         }
     }
 
@@ -92,32 +155,44 @@ public class EnemigoAlien1 : MonoBehaviour
             if (NavMesh.SamplePosition(
                 transform.position,
                 out hit,
-                20f,
+                distanciaWarpNavMesh,
                 NavMesh.AllAreas))
             {
-                agent.Warp(hit.position);
+                agent.Warp(
+                    hit.position
+                );
             }
         }
     }
 
     private void RotarHaciaJugador()
     {
+        if (jugador == null)
+            return;
+
         Vector3 direccion =
-            jugador.position - transform.position;
+            jugador.position -
+            transform.position;
 
         direccion.y = 0f;
 
-        if (direccion.sqrMagnitude < 0.01f)
+        if (direccion.sqrMagnitude <
+            0.01f)
+        {
             return;
+        }
 
         Quaternion rotacionObjetivo =
-            Quaternion.LookRotation(direccion);
+            Quaternion.LookRotation(
+                direccion
+            );
 
         transform.rotation =
             Quaternion.Slerp(
                 transform.rotation,
                 rotacionObjetivo,
-                velocidadRotacion * Time.deltaTime
+                velocidadRotacion *
+                Time.deltaTime
             );
     }
 
@@ -126,7 +201,9 @@ public class EnemigoAlien1 : MonoBehaviour
         if (!mostrarGizmos)
             return;
 
-        Gizmos.color = Color.red;
+        Gizmos.color =
+            Color.red;
+
         Gizmos.DrawWireSphere(
             transform.position,
             distanciaMinima

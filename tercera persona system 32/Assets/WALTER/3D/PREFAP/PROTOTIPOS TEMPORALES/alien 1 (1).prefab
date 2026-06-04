@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 6594568555930876531}
   - component: {fileID: 4842143232782776619}
   - component: {fileID: -8940249476141114376}
+  - component: {fileID: -7968613139958979843}
   m_Layer: 7
   m_Name: alien 1 (1)
   m_TagString: Untagged
@@ -177,9 +178,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   jugador: {fileID: 5992309312074546384, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
   distanciaMinima: 3
+  velocidadMovimiento: 4
+  aceleracion: 8
   velocidadRotacion: 8
   radioAgente: 0.6
-  distanciaFrenado: 0
   mostrarGizmos: 0
 --- !u!114 &-8940249476141114376
 MonoBehaviour:
@@ -200,6 +202,7 @@ MonoBehaviour:
   velocidadMovimientoBase: 4
   aceleracionBase: 8
   resistenciaBase: 0
+  puntosBase: 10
   aumentoVida: 0.15
   aumentoDanio: 0.1
   aumentoAtaque: 0.05
@@ -210,3 +213,17 @@ MonoBehaviour:
   velocidadMovimientoActual: 0
   aceleracionActual: 0
   resistenciaActual: 0
+--- !u!114 &-7968613139958979843
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8272684473738788310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17f66e5c60116194f80d7d26584986e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tipoEnemigo: 0
+  destruirAlMorir: 1

@@ -5,7 +5,15 @@ public class ZonaVueloNaves : MonoBehaviour
     [Header("Tamaño Zona")]
     [SerializeField]
     private Vector3 tamanoZona =
-        new Vector3(200f, 50f, 200f);
+        new Vector3(
+            200f,
+            50f,
+            200f
+        );
+
+    [Header("Debug")]
+    [SerializeField]
+    private bool mostrarGizmos = true;
 
     public Vector3 ObtenerPuntoAleatorio()
     {
@@ -14,20 +22,20 @@ public class ZonaVueloNaves : MonoBehaviour
 
         float randomX =
             Random.Range(
-                -tamanoZona.x / 2f,
-                tamanoZona.x / 2f
+                -tamanoZona.x * 0.5f,
+                tamanoZona.x * 0.5f
             );
 
         float randomY =
             Random.Range(
-                -tamanoZona.y / 2f,
-                tamanoZona.y / 2f
+                -tamanoZona.y * 0.5f,
+                tamanoZona.y * 0.5f
             );
 
         float randomZ =
             Random.Range(
-                -tamanoZona.z / 2f,
-                tamanoZona.z / 2f
+                -tamanoZona.z * 0.5f,
+                tamanoZona.z * 0.5f
             );
 
         return new Vector3(
@@ -37,11 +45,33 @@ public class ZonaVueloNaves : MonoBehaviour
         );
     }
 
+    public Vector3 ObtenerTamano()
+    {
+        return tamanoZona;
+    }
+
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.cyan;
+        if (!mostrarGizmos)
+            return;
+
+        Gizmos.color =
+            Color.cyan;
 
         Gizmos.DrawWireCube(
+            transform.position,
+            tamanoZona
+        );
+
+        Gizmos.color =
+            new Color(
+                0f,
+                1f,
+                1f,
+                0.15f
+            );
+
+        Gizmos.DrawCube(
             transform.position,
             tamanoZona
         );

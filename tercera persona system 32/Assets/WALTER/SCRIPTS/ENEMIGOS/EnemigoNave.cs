@@ -6,30 +6,16 @@ using UnityEngine.AI;
 public class EnemigoNave : MonoBehaviour
 {
     [Header("Jugador")]
-    [SerializeField] private Transform jugador;
-
-    [Header("Visual")]
-    [SerializeField] private Transform modeloVisual;
-    [SerializeField] private float alturaVisual = 10f;
+    [SerializeField]
+    private Transform jugador;
 
     [Header("Zona de Vuelo")]
-    [SerializeField] private ZonaVueloNaves zonaVuelo;
-
     [SerializeField]
-    private float distanciaParaNuevoDestino = 5f;
-
-    [SerializeField]
-    private float tiempoMaximoDestino = 5f;
+    private ZonaVueloNaves zonaVuelo;
 
     [Header("Movimiento")]
     [SerializeField]
-    private float distanciaDeteccion = 30f;
-
-    [SerializeField]
-    private float distanciaAtaque = 15f;
-
-    [SerializeField]
-    private float velocidadMovimiento = 8f;
+    private float velocidadMovimiento = 10f;
 
     [SerializeField]
     private float aceleracion = 20f;
@@ -37,27 +23,28 @@ public class EnemigoNave : MonoBehaviour
     [SerializeField]
     private float velocidadRotacion = 5f;
 
-    [Header("NavMesh")]
     [SerializeField]
-    private float radioAgente = 2f;
+    private float distanciaDeteccion = 40f;
 
     [SerializeField]
-    private ObstacleAvoidanceType obstacleAvoidance =
-        ObstacleAvoidanceType.HighQualityObstacleAvoidance;
-
-    [Header("Ataque")]
-    [SerializeField]
-    private GameObject proyectilPrefab;
+    private float distanciaAtaque = 20f;
 
     [SerializeField]
-    private Transform puntoDisparo;
+    private float distanciaNuevoDestino = 5f;
 
     [SerializeField]
-    private float tiempoEntreDisparos = 2f;
+    private float tiempoMaximoDestino = 5f;
+
+    [Header("Altura")]
+    [SerializeField]
+    private Transform modeloVisual;
+
+    [SerializeField]
+    private float alturaVisual = 10f;
 
     [Header("Spawn Enemigos")]
     [SerializeField]
-    private GameObject enemigoPrefab;
+    private string idPoolAlien = "alien";
 
     [SerializeField]
     private Transform puntoSpawn;
@@ -69,12 +56,19 @@ public class EnemigoNave : MonoBehaviour
     private float tiempoEntreSpawns = 5f;
 
     [SerializeField]
-    private int maximoPorNave = 10;
+    private int maximoAliensPorNave = 10;
 
     [SerializeField]
-    private int maximoPorHorda = 30;
+    private int maximoAliensGlobales = 100;
+
+    [Header("NavMesh")]
+    [SerializeField]
+    private float radioBusquedaNavMesh = 10f;
 
     [Header("Debug")]
+    [SerializeField]
+    private bool mostrarLogs = false;
+
     [SerializeField]
     private bool mostrarGizmos = true;
 
@@ -83,28 +77,37 @@ public class EnemigoNave : MonoBehaviour
     private Vector3 destinoActual;
 
     private float timerDestino;
-    private float timerDisparo;
 
-    private int enemigosGenerados;
+    private int aliensGenerados;
 
-    private static int enemigosTotalesVivos;
+    private static int aliensActivos;
 
     private void Awake()
     {
-        agent = GetComponent<NavMeshAgent>();
+        agent =
+            GetComponent<NavMeshAgent>();
 
         ConfigurarAgente();
 
         BuscarJugador();
     }
 
-    private void Start()
+    private void OnEnable()
     {
+        aliensGenerados = 0;
+
         VerificarNavMesh();
 
         GenerarNuevoDestino();
 
-        StartCoroutine(IniciarSpawn());
+        StartCoroutine(
+            RutinaSpawn()
+        );
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
     }
 
     private void Update()
@@ -118,17 +121,19 @@ public class EnemigoNave : MonoBehaviour
         if (!agent.isOnNavMesh)
             return;
 
-        float distancia =
+        float distanciaJugador =
             Vector3.Distance(
                 transform.position,
                 jugador.position
             );
 
-        if (distancia <= distanciaDeteccion)
+        if (distanciaJugador <=
+            distanciaDeteccion)
         {
             SeguirJugador();
 
-            if (distancia <= distanciaAtaque)
+            if (distanciaJugador <=
+                distanciaAtaque)
             {
                 AtacarJugador();
             }
@@ -138,64 +143,107 @@ public class EnemigoNave : MonoBehaviour
             Patrullar();
         }
 
-        AjustarAlturaVisual();
+        Rotar();
 
-        RotarHaciaMovimiento();
+        ActualizarAlturaVisual();
     }
 
-    #region Jugador
+    private void ConfigurarAgente()
+    {
+        agent.speed =
+            velocidadMovimiento;
+
+        agent.acceleration =
+            aceleracion;
+
+        agent.updateRotation =
+            false;
+
+        agent.updateUpAxis =
+            false;
+    }
 
     private void BuscarJugador()
     {
         GameObject player =
-            GameObject.FindGameObjectWithTag("Player");
+            GameObject.FindGameObjectWithTag(
+                "Player"
+            );
 
         if (player != null)
         {
-            jugador = player.transform;
+            jugador =
+                player.transform;
         }
-    }
-
-    #endregion
-
-    #region Configuración
-
-    private void ConfigurarAgente()
-    {
-        agent.speed = velocidadMovimiento;
-
-        agent.acceleration = aceleracion;
-
-        agent.radius = radioAgente;
-
-        agent.updateRotation = false;
-
-        agent.updateUpAxis = false;
-
-        agent.obstacleAvoidanceType =
-            obstacleAvoidance;
     }
 
     private void VerificarNavMesh()
     {
-        if (!agent.isOnNavMesh)
-        {
-            NavMeshHit hit;
+        if (agent.isOnNavMesh)
+            return;
 
-            if (NavMesh.SamplePosition(
-                transform.position,
-                out hit,
-                20f,
-                NavMesh.AllAreas))
-            {
-                agent.Warp(hit.position);
-            }
+        NavMeshHit hit;
+
+        if (NavMesh.SamplePosition(
+            transform.position,
+            out hit,
+            20f,
+            NavMesh.AllAreas))
+        {
+            agent.Warp(
+                hit.position
+            );
         }
     }
 
-    #endregion
-
     #region Movimiento
+
+    private void Patrullar()
+    {
+        if (zonaVuelo == null)
+            return;
+
+        timerDestino +=
+            Time.deltaTime;
+
+        float distancia =
+            Vector3.Distance(
+                transform.position,
+                destinoActual
+            );
+
+        if (distancia <=
+            distanciaNuevoDestino ||
+            timerDestino >=
+            tiempoMaximoDestino)
+        {
+            GenerarNuevoDestino();
+        }
+
+        agent.SetDestination(
+            destinoActual
+        );
+    }
+
+    private void GenerarNuevoDestino()
+    {
+        timerDestino = 0f;
+
+        Vector3 punto =
+            zonaVuelo.ObtenerPuntoAleatorio();
+
+        NavMeshHit hit;
+
+        if (NavMesh.SamplePosition(
+            punto,
+            out hit,
+            radioBusquedaNavMesh,
+            NavMesh.AllAreas))
+        {
+            destinoActual =
+                hit.position;
+        }
+    }
 
     private void SeguirJugador()
     {
@@ -204,70 +252,18 @@ public class EnemigoNave : MonoBehaviour
         );
     }
 
-    private void Patrullar()
-    {
-        if (zonaVuelo == null)
-            return;
-
-        timerDestino += Time.deltaTime;
-
-        float distancia =
-            Vector3.Distance(
-                transform.position,
-                destinoActual
-            );
-
-        if (distancia <= distanciaParaNuevoDestino ||
-            timerDestino >= tiempoMaximoDestino)
-        {
-            GenerarNuevoDestino();
-        }
-
-        agent.SetDestination(destinoActual);
-    }
-
-    private void GenerarNuevoDestino()
-    {
-        timerDestino = 0f;
-
-        Vector3 puntoAleatorio =
-            zonaVuelo.ObtenerPuntoAleatorio();
-
-        NavMeshHit hit;
-
-        if (NavMesh.SamplePosition(
-            puntoAleatorio,
-            out hit,
-            20f,
-            NavMesh.AllAreas))
-        {
-            destinoActual = hit.position;
-        }
-    }
-
-    private void AjustarAlturaVisual()
-    {
-        if (modeloVisual == null)
-            return;
-
-        Vector3 posicion =
-            modeloVisual.localPosition;
-
-        posicion.y = alturaVisual;
-
-        modeloVisual.localPosition =
-            posicion;
-    }
-
-    private void RotarHaciaMovimiento()
+    private void Rotar()
     {
         Vector3 direccion =
             agent.velocity;
 
         direccion.y = 0f;
 
-        if (direccion.sqrMagnitude < 0.01f)
+        if (direccion.sqrMagnitude <
+            0.01f)
+        {
             return;
+        }
 
         Quaternion rotacionObjetivo =
             Quaternion.LookRotation(
@@ -283,47 +279,51 @@ public class EnemigoNave : MonoBehaviour
             );
     }
 
+    private void ActualizarAlturaVisual()
+    {
+        if (modeloVisual == null)
+            return;
+
+        Vector3 posicion =
+            modeloVisual.localPosition;
+
+        posicion.y =
+            alturaVisual;
+
+        modeloVisual.localPosition =
+            posicion;
+    }
+
     #endregion
 
     #region Ataque
 
     private void AtacarJugador()
     {
-        timerDisparo += Time.deltaTime;
-
-        if (timerDisparo >= tiempoEntreDisparos)
-        {
-            timerDisparo = 0f;
-
-            if (proyectilPrefab != null &&
-                puntoDisparo != null)
-            {
-                Instantiate(
-                    proyectilPrefab,
-                    puntoDisparo.position,
-                    puntoDisparo.rotation
-                );
-            }
-        }
+        // Aquí irán los proyectiles
+        // cuando los creemos.
     }
 
     #endregion
 
     #region Spawn
 
-    private IEnumerator IniciarSpawn()
+    private IEnumerator RutinaSpawn()
     {
         yield return new WaitForSeconds(
             tiempoAntesGenerar
         );
 
-        while (enemigosGenerados <
-               maximoPorNave)
+        while (true)
         {
-            if (enemigosTotalesVivos <
-                maximoPorHorda)
+            if (aliensGenerados <
+                maximoAliensPorNave)
             {
-                CrearEnemigo();
+                if (aliensActivos <
+                    maximoAliensGlobales)
+                {
+                    CrearAlien();
+                }
             }
 
             yield return new WaitForSeconds(
@@ -332,9 +332,9 @@ public class EnemigoNave : MonoBehaviour
         }
     }
 
-    private void CrearEnemigo()
+    private void CrearAlien()
     {
-        if (enemigoPrefab == null)
+        if (PoolManager.Instance == null)
             return;
 
         if (puntoSpawn == null)
@@ -345,64 +345,76 @@ public class EnemigoNave : MonoBehaviour
         if (NavMesh.SamplePosition(
             puntoSpawn.position,
             out hit,
-            10f,
+            radioBusquedaNavMesh,
             NavMesh.AllAreas))
         {
-            GameObject enemigo =
-                Instantiate(
-                    enemigoPrefab,
+            GameObject alien =
+                PoolManager.Instance
+                .ObtenerObjeto(
+                    idPoolAlien,
                     hit.position,
-                    puntoSpawn.rotation
+                    Quaternion.identity
                 );
 
-            enemigosGenerados++;
+            if (alien == null)
+                return;
 
-            enemigosTotalesVivos++;
+            aliensGenerados++;
+            aliensActivos++;
 
             ControladorEnemigo controlador =
-                enemigo.GetComponent<ControladorEnemigo>();
+                alien.GetComponent
+                <ControladorEnemigo>();
 
             if (controlador != null)
             {
+                controlador.OnEnemyDeath -=
+                    ReducirContador;
+
                 controlador.OnEnemyDeath +=
                     ReducirContador;
+            }
+
+            if (mostrarLogs)
+            {
+                Debug.Log(
+                    "Alien generado por nave"
+                );
             }
         }
     }
 
     private void ReducirContador()
     {
-        enemigosTotalesVivos--;
+        aliensActivos--;
 
-        if (enemigosTotalesVivos < 0)
+        if (aliensActivos < 0)
         {
-            enemigosTotalesVivos = 0;
+            aliensActivos = 0;
         }
     }
 
     #endregion
-
-    #region Gizmos
 
     private void OnDrawGizmosSelected()
     {
         if (!mostrarGizmos)
             return;
 
-        Gizmos.color = Color.yellow;
+        Gizmos.color =
+            Color.yellow;
 
         Gizmos.DrawWireSphere(
             transform.position,
             distanciaDeteccion
         );
 
-        Gizmos.color = Color.red;
+        Gizmos.color =
+            Color.red;
 
         Gizmos.DrawWireSphere(
             transform.position,
             distanciaAtaque
         );
     }
-
-    #endregion
 }

@@ -4,33 +4,34 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class StatsEnemigo : MonoBehaviour
 {
-    [Header("VIDA")]
+    [Header("Vida")]
     [SerializeField]
     private float vidaBase = 100f;
 
-    [SerializeField]
-    private float vidaActual;
-
-    [Header("DAÑO")]
+    [Header("Daño")]
     [SerializeField]
     private float danioBase = 10f;
 
-    [Header("ATAQUE")]
+    [Header("Ataque")]
     [SerializeField]
     private float velocidadAtaqueBase = 1f;
 
-    [Header("MOVIMIENTO")]
+    [Header("Movimiento")]
     [SerializeField]
     private float velocidadMovimientoBase = 4f;
 
     [SerializeField]
     private float aceleracionBase = 8f;
 
-    [Header("DEFENSA")]
+    [Header("Defensa")]
     [SerializeField]
     private float resistenciaBase = 0f;
 
-    [Header("ESCALADO POR OLEADA")]
+    [Header("Recompensa")]
+    [SerializeField]
+    private int puntosBase = 10;
+
+    [Header("Escalado Por Oleada")]
     [SerializeField]
     private float aumentoVida = 0.15f;
 
@@ -46,27 +47,30 @@ public class StatsEnemigo : MonoBehaviour
     [SerializeField]
     private float aumentoResistencia = 0.03f;
 
-    [Header("STATS FINALES")]
+    [Header("Debug")]
     [SerializeField]
+    private bool mostrarLogs = false;
+
+    private float vidaActual;
     private float danioActual;
-
-    [SerializeField]
     private float velocidadAtaqueActual;
-
-    [SerializeField]
     private float velocidadMovimientoActual;
-
-    [SerializeField]
     private float aceleracionActual;
-
-    [SerializeField]
     private float resistenciaActual;
 
     private NavMeshAgent agent;
-
     private ControladorEnemigo controlador;
 
     private bool muerto;
+
+    public float VidaActual => vidaActual;
+    public float VidaMaxima => vidaBase;
+
+    public float Danio => danioActual;
+    public float VelocidadAtaque => velocidadAtaqueActual;
+    public float VelocidadMovimiento => velocidadMovimientoActual;
+    public float Aceleracion => aceleracionActual;
+    public float Resistencia => resistenciaActual;
 
     private void Awake()
     {
@@ -79,7 +83,13 @@ public class StatsEnemigo : MonoBehaviour
         AplicarStatsBase();
     }
 
-    // APLICAR STATS BASE
+    private void OnEnable()
+    {
+        muerto = false;
+
+        AplicarStatsBase();
+    }
+
     private void AplicarStatsBase()
     {
         vidaActual =
@@ -103,39 +113,65 @@ public class StatsEnemigo : MonoBehaviour
         AplicarMovimiento();
     }
 
-    // ESCALAR POR OLEADA
     public void ConfigurarPorOleada(
-        int oleada
-    )
+        int oleada)
     {
         vidaActual =
             vidaBase *
-            (1f + aumentoVida * oleada);
+            (
+                1f +
+                (
+                    aumentoVida *
+                    oleada
+                )
+            );
 
         danioActual =
             danioBase *
-            (1f + aumentoDanio * oleada);
+            (
+                1f +
+                (
+                    aumentoDanio *
+                    oleada
+                )
+            );
 
         velocidadAtaqueActual =
             velocidadAtaqueBase *
-            (1f + aumentoAtaque * oleada);
+            (
+                1f +
+                (
+                    aumentoAtaque *
+                    oleada
+                )
+            );
 
         aceleracionActual =
             aceleracionBase *
-            (1f + aumentoAceleracion * oleada);
+            (
+                1f +
+                (
+                    aumentoAceleracion *
+                    oleada
+                )
+            );
 
         resistenciaActual =
             resistenciaBase *
-            (1f + aumentoResistencia * oleada);
+            (
+                1f +
+                (
+                    aumentoResistencia *
+                    oleada
+                )
+            );
 
-        // NO aumenta velocidad
         velocidadMovimientoActual =
             velocidadMovimientoBase;
 
         AplicarMovimiento();
     }
 
-    // APLICAR MOVIMIENTO
     private void AplicarMovimiento()
     {
         if (agent == null)
@@ -148,27 +184,31 @@ public class StatsEnemigo : MonoBehaviour
             aceleracionActual;
     }
 
-    // RECIBIR DAÑO
     public void RecibirDanio(
-        float danio
-    )
+        float cantidad)
     {
         if (muerto)
             return;
 
         float danioFinal =
             Mathf.Max(
-                danio - resistenciaActual,
+                cantidad -
+                resistenciaActual,
                 1f
             );
 
-        vidaActual -= danioFinal;
+        vidaActual -=
+            danioFinal;
 
-        Debug.Log(
-            gameObject.name +
-            " recibió daño: " +
-            danioFinal
-        );
+        if (mostrarLogs)
+        {
+            Debug.Log(
+                gameObject.name +
+                " recibió " +
+                danioFinal +
+                " de daño."
+            );
+        }
 
         if (vidaActual <= 0f)
         {
@@ -176,7 +216,6 @@ public class StatsEnemigo : MonoBehaviour
         }
     }
 
-    // MORIR
     private void Morir()
     {
         if (muerto)
@@ -184,37 +223,23 @@ public class StatsEnemigo : MonoBehaviour
 
         muerto = true;
 
-        Debug.Log(
-            gameObject.name +
-            " murió"
-        );
-
         if (controlador != null)
         {
             controlador.Morir();
         }
         else
         {
-            Destroy(gameObject);
+            gameObject.SetActive(false);
         }
     }
 
-    // GETTERS
-    public float Vida =>
-        vidaActual;
+    public int ObtenerPuntos()
+    {
+        return puntosBase;
+    }
 
-    public float Danio =>
-        danioActual;
-
-    public float VelocidadAtaque =>
-        velocidadAtaqueActual;
-
-    public float VelocidadMovimiento =>
-        velocidadMovimientoActual;
-
-    public float Aceleracion =>
-        aceleracionActual;
-
-    public float Resistencia =>
-        resistenciaActual;
+    public float ObtenerPorcentajeVida()
+    {
+        return vidaActual / vidaBase;
+    }
 }

@@ -1,19 +1,40 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(PoolObject))]
 public class ControladorEnemigo : MonoBehaviour
 {
     public Action OnEnemyDeath;
 
     [Header("Tipo Enemigo")]
     [SerializeField]
-    private TipoEnemigo tipoEnemigo;
+    private TipoEnemigo tipoEnemigo =
+        TipoEnemigo.Alien;
 
     [Header("Debug")]
     [SerializeField]
-    private bool destruirAlMorir = true;
+    private bool mostrarLogs = false;
 
     private bool muerto;
+
+    private StatsEnemigo statsEnemigo;
+    private PoolObject poolObject;
+
+    public bool Muerto => muerto;
+
+    private void Awake()
+    {
+        statsEnemigo =
+            GetComponent<StatsEnemigo>();
+
+        poolObject =
+            GetComponent<PoolObject>();
+    }
+
+    private void OnEnable()
+    {
+        muerto = false;
+    }
 
     public void Morir()
     {
@@ -22,20 +43,22 @@ public class ControladorEnemigo : MonoBehaviour
 
         muerto = true;
 
-        // EVENTO
+        RegistrarMuerte();
+
         OnEnemyDeath?.Invoke();
 
-        // REGISTRAR KILL
-        RegistrarKill();
-
-        // DESTRUIR
-        if (destruirAlMorir)
+        if (mostrarLogs)
         {
-            Destroy(gameObject);
+            Debug.Log(
+                gameObject.name +
+                " eliminado."
+            );
         }
+
+        RegresarAlPool();
     }
 
-    private void RegistrarKill()
+    private void RegistrarMuerte()
     {
         if (GameManager.Instance == null)
             return;
@@ -56,5 +79,43 @@ public class ControladorEnemigo : MonoBehaviour
 
                 break;
         }
+
+        int puntosBase = 0;
+
+        if (statsEnemigo != null)
+        {
+            puntosBase =
+                statsEnemigo.ObtenerPuntos();
+        }
+
+        int puntosFinales =
+            Mathf.RoundToInt(
+                puntosBase *
+                GameManager.Instance
+                .ObtenerMultiplicadorPuntos()
+            );
+
+        GameManager.Instance
+            .AgregarPuntos(
+                puntosFinales
+            );
+    }
+
+    private void RegresarAlPool()
+    {
+        if (poolObject != null)
+        {
+            poolObject.RegresarAlPool();
+        }
+        else
+        {
+            gameObject.SetActive(false);
+        }
+    }
+
+    [ContextMenu("Matar Enemigo")]
+    private void DebugMorir()
+    {
+        Morir();
     }
 }
