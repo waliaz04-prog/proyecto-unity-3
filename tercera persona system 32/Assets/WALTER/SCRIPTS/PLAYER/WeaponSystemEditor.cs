@@ -19,6 +19,11 @@ public class WeaponSystemEditor : Editor
 
         GUILayout.Space(10);
 
+        EditorGUILayout.LabelField(
+            "CONFIGURACIÓN GENERAL",
+            EditorStyles.boldLabel
+        );
+
         EditorGUILayout.PropertyField(
             serializedObject.FindProperty(
                 "danio"
@@ -40,6 +45,7 @@ public class WeaponSystemEditor : Editor
         switch (tipo)
         {
             // MELEE
+
             case WeaponType.Melee:
 
                 EditorGUILayout.LabelField(
@@ -59,32 +65,20 @@ public class WeaponSystemEditor : Editor
                     )
                 );
 
-                break;
+                EditorGUILayout.PropertyField(
+                    serializedObject.FindProperty(
+                        "tiempoHitbox"
+                    )
+                );
 
+                break;
             // FIREARM
+
             case WeaponType.Firearm:
 
                 EditorGUILayout.LabelField(
                     "CONFIGURACIÓN FIREARM",
                     EditorStyles.boldLabel
-                );
-
-                EditorGUILayout.PropertyField(
-                    serializedObject.FindProperty(
-                        "camaraJugador"
-                    )
-                );
-
-                EditorGUILayout.PropertyField(
-                    serializedObject.FindProperty(
-                        "capaEnemigo"
-                    )
-                );
-
-                EditorGUILayout.PropertyField(
-                    serializedObject.FindProperty(
-                        "rangoDisparo"
-                    )
                 );
 
                 EditorGUILayout.PropertyField(
@@ -95,13 +89,68 @@ public class WeaponSystemEditor : Editor
 
                 EditorGUILayout.PropertyField(
                     serializedObject.FindProperty(
-                        "municion"
+                        "usarMunicion"
+                    )
+                );
+
+                EditorGUILayout.PropertyField(
+                    serializedObject.FindProperty(
+                        "municionActual"
                     )
                 );
 
                 EditorGUILayout.PropertyField(
                     serializedObject.FindProperty(
                         "municionMaxima"
+                    )
+                );
+
+                GUILayout.Space(5);
+
+                EditorGUILayout.LabelField(
+                    "CONFIGURACIÓN BALA",
+                    EditorStyles.boldLabel
+                );
+
+                EditorGUILayout.PropertyField(
+                    serializedObject.FindProperty(
+                        "prefabBala"
+                    )
+                );
+
+                EditorGUILayout.PropertyField(
+                    serializedObject.FindProperty(
+                        "puntoDisparo"
+                    )
+                );
+
+                EditorGUILayout.PropertyField(
+                    serializedObject.FindProperty(
+                        "velocidadBala"
+                    )
+                );
+
+                EditorGUILayout.PropertyField(
+                    serializedObject.FindProperty(
+                        "tiempoVidaBala"
+                    )
+                );
+
+                EditorGUILayout.PropertyField(
+                    serializedObject.FindProperty(
+                        "balasPorDisparo"
+                    )
+                );
+
+                EditorGUILayout.PropertyField(
+                    serializedObject.FindProperty(
+                        "dispersion"
+                    )
+                );
+
+                EditorGUILayout.PropertyField(
+                    serializedObject.FindProperty(
+                        "atravesarEnemigos"
                     )
                 );
 
@@ -113,6 +162,19 @@ public class WeaponSystemEditor : Editor
 
                 break;
         }
+
+        GUILayout.Space(10);
+
+        EditorGUILayout.LabelField(
+            "DEBUG",
+            EditorStyles.boldLabel
+        );
+
+        EditorGUILayout.PropertyField(
+            serializedObject.FindProperty(
+                "mostrarLogs"
+            )
+        );
 
         serializedObject.ApplyModifiedProperties();
     }

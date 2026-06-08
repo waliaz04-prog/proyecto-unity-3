@@ -245,17 +245,52 @@ MonoBehaviour:
   tipoArma: 0
   danio: 20
   tiempoEntreAtaques: 0.5
+  armaAutomatica: 0
   meleeTrigger: {fileID: 6510467387561048229}
   animator: {fileID: 0}
-  camaraJugador: {fileID: 0}
-  capaEnemigo:
-    serializedVersion: 2
-    m_Bits: 0
-  rangoDisparo: 100
-  armaAutomatica: 0
-  municion: 30
+  tiempoHitbox: 0.2
+  prefabBala: {fileID: 0}
+  puntoDisparo: {fileID: 0}
+  velocidadBala: 60
+  tiempoVidaBala: 5
+  balasPorDisparo: 1
+  dispersion: 0
+  usarMunicion: 1
+  municionActual: 30
   municionMaxima: 30
   efectoDisparo: {fileID: 0}
+  mostrarLogs: 0
+--- !u!1 &8297151441318104030
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4954335792611714048}
+  m_Layer: 0
+  m_Name: punto de disparo
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4954335792611714048
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8297151441318104030}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.315, y: 1.369, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1378760982327463765}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8324433504354563634
 GameObject:
   m_ObjectHideFlags: 0
@@ -664,11 +699,52 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4954335792611714048}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2330792036785041644}
   m_SourcePrefab: {fileID: 100100000, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
 --- !u!4 &1378760982327463765 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
   m_PrefabInstance: {fileID: 1488702131751971006}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1759085986311853551 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+  m_PrefabInstance: {fileID: 1488702131751971006}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2330792036785041644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1759085986311853551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccbd184398adc1d49bc497d5e5e1228e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tipoArma: 1
+  danio: 20
+  tiempoEntreAtaques: 0.5
+  armaAutomatica: 0
+  meleeTrigger: {fileID: 0}
+  animator: {fileID: 0}
+  tiempoHitbox: 0.2
+  prefabBala: {fileID: 6514964250100746237, guid: 4cb60fe6255642142982c1b39f1d58fc, type: 3}
+  puntoDisparo: {fileID: 4954335792611714048}
+  velocidadBala: 60
+  tiempoVidaBala: 5
+  balasPorDisparo: 1
+  dispersion: 0
+  usarMunicion: 1
+  municionActual: 30
+  municionMaxima: 30
+  efectoDisparo: {fileID: 0}
+  mostrarLogs: 0

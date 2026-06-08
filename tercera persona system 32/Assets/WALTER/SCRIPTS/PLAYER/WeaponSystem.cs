@@ -6,43 +6,73 @@ public class WeaponSystem : MonoBehaviour
     [SerializeField]
     private WeaponType tipoArma;
 
-    [Header("CONFIGURACIÓN GENERAL")]
+    [Header("DAÑO")]
     [SerializeField]
     private float danio = 20f;
 
+    [Header("ATAQUE")]
     [SerializeField]
-    private float tiempoEntreAtaques = 0.5f;
+    private float tiempoEntreAtaques = 0.3f;
 
     private float siguienteAtaque;
 
-    [Header("CONFIGURACIÓN MELEE")]
+    // MELEE
+
+    [Header("MELEE")]
     [SerializeField]
     private WeaponMeleeTrigger meleeTrigger;
 
     [SerializeField]
     private Animator animator;
 
-    [Header("CONFIGURACIÓN FIREARM")]
     [SerializeField]
-    private Camera camaraJugador;
+    private float tiempoHitbox = 0.2f;
+
+    // FIREARM
+
+    [Header("DISPARO")]
+    [SerializeField]
+    private bool armaAutomatica = false;
 
     [SerializeField]
-    private LayerMask capaEnemigo;
+    private bool usarMunicion = true;
 
     [SerializeField]
-    private float rangoDisparo = 100f;
-
-    [SerializeField]
-    private bool armaAutomatica;
-
-    [SerializeField]
-    private int municion = 30;
+    private int municionActual = 30;
 
     [SerializeField]
     private int municionMaxima = 30;
 
     [SerializeField]
+    private int balasPorDisparo = 1;
+
+    [SerializeField]
+    private float dispersion = 0f;
+
+    [SerializeField]
+    private bool atravesarEnemigos = false;
+
+    // BALA
+    
+    [Header("PREFAB BALA")]
+    [SerializeField]
+    private GameObject prefabBala;
+
+    [SerializeField]
+    private Transform puntoDisparo;
+
+    [SerializeField]
+    private float velocidadBala = 60f;
+
+    [SerializeField]
+    private float tiempoVidaBala = 5f;
+
+    [SerializeField]
     private ParticleSystem efectoDisparo;
+
+    [Header("DEBUG")]
+    [SerializeField]
+    private bool mostrarLogs = false;
 
     private void Awake()
     {
@@ -58,40 +88,43 @@ public class WeaponSystem : MonoBehaviour
         DetectarInput();
     }
 
-    // DETECTAR INPUT
     private void DetectarInput()
     {
-        // COOLDOWN
-        if (Time.time < siguienteAtaque)
+        if (Time.time <
+            siguienteAtaque)
+        {
             return;
+        }
 
         switch (tipoArma)
         {
-            // MELEE
             case WeaponType.Melee:
 
-                if (Input.GetMouseButtonDown(0))
+                if (
+                    Input.GetMouseButtonDown(0)
+                )
                 {
                     AtaqueMelee();
                 }
 
                 break;
 
-            // FIREARM
             case WeaponType.Firearm:
 
-                // AUTOMÁTICA
                 if (armaAutomatica)
                 {
-                    if (Input.GetMouseButton(0))
+                    if (
+                        Input.GetMouseButton(0)
+                    )
                     {
                         Disparar();
                     }
                 }
                 else
                 {
-                    // SEMIAUTOMÁTICA
-                    if (Input.GetMouseButtonDown(0))
+                    if (
+                        Input.GetMouseButtonDown(0)
+                    )
                     {
                         Disparar();
                     }
@@ -101,13 +134,14 @@ public class WeaponSystem : MonoBehaviour
         }
     }
 
-    // ATAQUE MELEE
+    // MELEE
+    
     private void AtaqueMelee()
     {
         siguienteAtaque =
-            Time.time + tiempoEntreAtaques;
+            Time.time +
+            tiempoEntreAtaques;
 
-        // ANIMACIÓN
         if (animator != null)
         {
             animator.SetTrigger(
@@ -116,106 +150,162 @@ public class WeaponSystem : MonoBehaviour
         }
         else
         {
-            // SI NO HAY ANIMACIÓN
             ActivarMelee();
 
             Invoke(
-                nameof(DesactivarMelee),
-                0.2f
+                nameof(
+                    DesactivarMelee
+                ),
+                tiempoHitbox
             );
         }
     }
 
-    // ACTIVAR HITBOX
     public void ActivarMelee()
     {
         if (meleeTrigger == null)
             return;
 
-        meleeTrigger.ActivarTrigger();
+        meleeTrigger
+            .ActivarTrigger();
     }
 
-    // DESACTIVAR HITBOX
     public void DesactivarMelee()
     {
         if (meleeTrigger == null)
             return;
 
-        meleeTrigger.DesactivarTrigger();
+        meleeTrigger
+            .DesactivarTrigger();
     }
 
-    // DISPARAR
+        // DISPARO
+    
     private void Disparar()
     {
-        // SIN MUNICIÓN
-        if (municion <= 0)
+        if (
+            usarMunicion &&
+            municionActual <= 0
+        )
         {
-            Debug.Log(
-                "Sin munición"
-            );
+            if (mostrarLogs)
+            {
+                Debug.Log(
+                    "Sin munición"
+                );
+            }
 
             return;
         }
 
-        municion--;
-
         siguienteAtaque =
-            Time.time + tiempoEntreAtaques;
+            Time.time +
+            tiempoEntreAtaques;
 
-        // EFECTO
+        if (usarMunicion)
+        {
+            municionActual--;
+        }
+
         if (efectoDisparo != null)
         {
             efectoDisparo.Play();
         }
 
-        // RAYCAST
-        Ray rayo =
-            camaraJugador
-            .ViewportPointToRay(
-                new Vector3(0.5f, 0.5f)
-            );
-
-        // DETECTAR ENEMIGO
-        if (Physics.Raycast(
-            rayo,
-            out RaycastHit impacto,
-            rangoDisparo,
-            capaEnemigo
-        ))
+        for (
+            int i = 0;
+            i < balasPorDisparo;
+            i++
+        )
         {
-            StatsEnemigo enemigo =
-                impacto.collider
-                .GetComponentInParent
-                <StatsEnemigo>();
-
-            if (enemigo != null)
-            {
-                enemigo.RecibirDanio(
-                    danio
-                );
-
-                Debug.Log(
-                    "Disparo a: " +
-                    enemigo.name
-                );
-            }
+            CrearBala();
         }
     }
 
-    // RECARGAR
+    private void CrearBala()
+    {
+        if (
+            prefabBala == null ||
+            puntoDisparo == null
+        )
+        {
+            return;
+        }
+
+        Quaternion rotacion =
+            puntoDisparo.rotation;
+
+        rotacion *= Quaternion.Euler(
+
+            Random.Range(
+                -dispersion,
+                dispersion
+            ),
+
+            Random.Range(
+                -dispersion,
+                dispersion
+            ),
+
+            0f
+        );
+
+        GameObject nuevaBala =
+            Instantiate(
+                prefabBala,
+                puntoDisparo.position,
+                rotacion
+            );
+
+        Bala bala =
+            nuevaBala
+            .GetComponent<Bala>();
+
+        if (bala != null)
+        {
+            bala.Configurar(
+
+                danio,
+
+                velocidadBala,
+
+                tiempoVidaBala,
+
+                atravesarEnemigos
+            );
+        }
+    }
+
+        // MUNICIÓN
+    
     public void Recargar()
     {
-        municion = municionMaxima;
+        municionActual =
+            municionMaxima;
     }
 
     // GETTERS
+    
     public float ObtenerDanio()
     {
         return danio;
     }
 
-    public WeaponType ObtenerTipoArma()
+    public WeaponType
+        ObtenerTipoArma()
     {
         return tipoArma;
+    }
+
+    public int
+        ObtenerMunicion()
+    {
+        return municionActual;
+    }
+
+    public int
+        ObtenerMunicionMaxima()
+    {
+        return municionMaxima;
     }
 }
