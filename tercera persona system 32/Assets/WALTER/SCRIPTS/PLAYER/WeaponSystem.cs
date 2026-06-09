@@ -6,17 +6,12 @@ public class WeaponSystem : MonoBehaviour
     [SerializeField]
     private WeaponType tipoArma;
 
-    [Header("DAÑO")]
+    [Header("CONFIGURACIÓN GENERAL")]
     [SerializeField]
     private float danio = 20f;
 
-    [Header("ATAQUE")]
     [SerializeField]
-    private float tiempoEntreAtaques = 0.3f;
-
-    private float siguienteAtaque;
-
-    // MELEE
+    private float tiempoEntreAtaques = 0.5f;
 
     [Header("MELEE")]
     [SerializeField]
@@ -28,11 +23,24 @@ public class WeaponSystem : MonoBehaviour
     [SerializeField]
     private float tiempoHitbox = 0.2f;
 
-    // FIREARM
-
-    [Header("DISPARO")]
+    [Header("ARMA DE FUEGO")]
     [SerializeField]
     private bool armaAutomatica = false;
+
+    [SerializeField]
+    private GameObject prefabBala;
+
+    [SerializeField]
+    private Transform puntoDisparo;
+
+    [SerializeField]
+    private ParticleSystem efectoDisparo;
+
+    [SerializeField]
+    private int balasPorDisparo = 1;
+
+    [SerializeField]
+    private float dispersion = 0f;
 
     [SerializeField]
     private bool usarMunicion = true;
@@ -44,35 +52,19 @@ public class WeaponSystem : MonoBehaviour
     private int municionMaxima = 30;
 
     [SerializeField]
-    private int balasPorDisparo = 1;
-
-    [SerializeField]
-    private float dispersion = 0f;
-
-    [SerializeField]
-    private bool atravesarEnemigos = false;
-
-    // BALA
-    
-    [Header("PREFAB BALA")]
-    [SerializeField]
-    private GameObject prefabBala;
-
-    [SerializeField]
-    private Transform puntoDisparo;
-
-    [SerializeField]
-    private float velocidadBala = 60f;
+    private float velocidadBala = 80f;
 
     [SerializeField]
     private float tiempoVidaBala = 5f;
 
     [SerializeField]
-    private ParticleSystem efectoDisparo;
+    private bool atravesarEnemigos = false;
 
     [Header("DEBUG")]
     [SerializeField]
     private bool mostrarLogs = false;
+
+    private float siguienteAtaque;
 
     private void Awake()
     {
@@ -85,16 +77,8 @@ public class WeaponSystem : MonoBehaviour
 
     private void Update()
     {
-        DetectarInput();
-    }
-
-    private void DetectarInput()
-    {
-        if (Time.time <
-            siguienteAtaque)
-        {
+        if (Time.time < siguienteAtaque)
             return;
-        }
 
         switch (tipoArma)
         {
@@ -134,8 +118,6 @@ public class WeaponSystem : MonoBehaviour
         }
     }
 
-    // MELEE
-    
     private void AtaqueMelee()
     {
         siguienteAtaque =
@@ -166,8 +148,7 @@ public class WeaponSystem : MonoBehaviour
         if (meleeTrigger == null)
             return;
 
-        meleeTrigger
-            .ActivarTrigger();
+        meleeTrigger.ActivarTrigger();
     }
 
     public void DesactivarMelee()
@@ -175,12 +156,9 @@ public class WeaponSystem : MonoBehaviour
         if (meleeTrigger == null)
             return;
 
-        meleeTrigger
-            .DesactivarTrigger();
+        meleeTrigger.DesactivarTrigger();
     }
 
-        // DISPARO
-    
     private void Disparar()
     {
         if (
@@ -232,10 +210,52 @@ public class WeaponSystem : MonoBehaviour
             return;
         }
 
-        Quaternion rotacion =
-            puntoDisparo.rotation;
+        Camera camara =
+            Camera.main;
 
-        rotacion *= Quaternion.Euler(
+        if (camara == null)
+        {
+            return;
+        }
+
+        Ray ray =
+            camara
+            .ViewportPointToRay(
+                new Vector3(
+                    0.5f,
+                    0.5f,
+                    0f
+                )
+            );
+
+        Vector3 puntoObjetivo;
+
+        if (
+            Physics.Raycast(
+                ray,
+                out RaycastHit hit,
+                1000f
+            )
+        )
+        {
+            puntoObjetivo =
+                hit.point;
+        }
+        else
+        {
+            puntoObjetivo =
+                ray.origin +
+                ray.direction *
+                1000f;
+        }
+
+        Vector3 direccion =
+            (
+                puntoObjetivo -
+                puntoDisparo.position
+            ).normalized;
+
+        direccion += new Vector3(
 
             Random.Range(
                 -dispersion,
@@ -247,14 +267,21 @@ public class WeaponSystem : MonoBehaviour
                 dispersion
             ),
 
-            0f
+            Random.Range(
+                -dispersion,
+                dispersion
+            )
         );
+
+        direccion.Normalize();
 
         GameObject nuevaBala =
             Instantiate(
                 prefabBala,
                 puntoDisparo.position,
-                rotacion
+                Quaternion.LookRotation(
+                    direccion
+                )
             );
 
         Bala bala =
@@ -272,39 +299,33 @@ public class WeaponSystem : MonoBehaviour
                 tiempoVidaBala,
 
                 atravesarEnemigos
+
             );
         }
     }
 
-        // MUNICIÓN
-    
     public void Recargar()
     {
         municionActual =
             municionMaxima;
     }
 
-    // GETTERS
-    
     public float ObtenerDanio()
     {
         return danio;
     }
 
-    public WeaponType
-        ObtenerTipoArma()
+    public WeaponType ObtenerTipoArma()
     {
         return tipoArma;
     }
 
-    public int
-        ObtenerMunicion()
+    public int ObtenerMunicion()
     {
         return municionActual;
     }
 
-    public int
-        ObtenerMunicionMaxima()
+    public int ObtenerMunicionMaxima()
     {
         return municionMaxima;
     }

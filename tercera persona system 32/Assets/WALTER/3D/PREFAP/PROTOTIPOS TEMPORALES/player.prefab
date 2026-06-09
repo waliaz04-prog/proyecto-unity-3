@@ -245,20 +245,21 @@ MonoBehaviour:
   tipoArma: 0
   danio: 20
   tiempoEntreAtaques: 0.5
-  armaAutomatica: 0
   meleeTrigger: {fileID: 6510467387561048229}
   animator: {fileID: 0}
   tiempoHitbox: 0.2
+  armaAutomatica: 0
   prefabBala: {fileID: 0}
   puntoDisparo: {fileID: 0}
-  velocidadBala: 60
-  tiempoVidaBala: 5
+  efectoDisparo: {fileID: 0}
   balasPorDisparo: 1
   dispersion: 0
   usarMunicion: 1
   municionActual: 30
   municionMaxima: 30
-  efectoDisparo: {fileID: 0}
+  velocidadBala: 60
+  tiempoVidaBala: 5
+  atravesarEnemigos: 0
   mostrarLogs: 0
 --- !u!1 &8297151441318104030
 GameObject:
@@ -461,6 +462,7 @@ GameObject:
   - component: {fileID: 5395908895623399333}
   - component: {fileID: 2112330049133463319}
   - component: {fileID: 2934017864644460271}
+  - component: {fileID: 7344658833576698065}
   m_Layer: 3
   m_Name: player
   m_TagString: Player
@@ -641,6 +643,22 @@ MonoBehaviour:
   escudoMaximo: 100
   tiempoAntesRegenerar: 4
   velocidadRegeneracion: 20
+--- !u!114 &7344658833576698065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9054212264162514268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edf64103abf046e4c8f6111f484c3c52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  armas:
+  - {fileID: 7525855898209256558}
+  - {fileID: 1759085986311853551}
+  armaInicial: 2
 --- !u!1001 &1488702131751971006
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -707,6 +725,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2330792036785041644}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6354164419402435360}
   m_SourcePrefab: {fileID: 100100000, guid: 85b2f936d86cff046a6bb2db3c031acc, type: 3}
 --- !u!4 &1378760982327463765 stripped
 Transform:
@@ -733,18 +754,39 @@ MonoBehaviour:
   tipoArma: 1
   danio: 20
   tiempoEntreAtaques: 0.5
-  armaAutomatica: 0
   meleeTrigger: {fileID: 0}
   animator: {fileID: 0}
   tiempoHitbox: 0.2
+  armaAutomatica: 0
   prefabBala: {fileID: 6514964250100746237, guid: 4cb60fe6255642142982c1b39f1d58fc, type: 3}
   puntoDisparo: {fileID: 4954335792611714048}
-  velocidadBala: 60
-  tiempoVidaBala: 5
+  efectoDisparo: {fileID: 0}
   balasPorDisparo: 1
   dispersion: 0
   usarMunicion: 1
   municionActual: 30
   municionMaxima: 30
-  efectoDisparo: {fileID: 0}
+  velocidadBala: 60
+  tiempoVidaBala: 5
+  atravesarEnemigos: 0
   mostrarLogs: 0
+--- !u!114 &6354164419402435360
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1759085986311853551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8a45f6b89cb53a468ba01a81ea760b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  camaraJugador: {fileID: 2483376445309457314}
+  arma: {fileID: 1378760982327463765}
+  distanciaApuntado: 1000
+  velocidadRotacion: 15
+  capasImpacto:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  dibujarLinea: 1
