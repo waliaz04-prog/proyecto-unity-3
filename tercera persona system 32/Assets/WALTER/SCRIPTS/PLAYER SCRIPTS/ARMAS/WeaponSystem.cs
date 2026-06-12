@@ -2,18 +2,18 @@ using UnityEngine;
 
 public class WeaponSystem : MonoBehaviour
 {
-    [Header("TIPO DE ARMA")]
+    [Header("Tipo")]
     [SerializeField]
     private WeaponType tipoArma;
 
-    [Header("CONFIGURACIÓN GENERAL")]
+    [Header("General")]
     [SerializeField]
     private float danio = 20f;
 
     [SerializeField]
     private float tiempoEntreAtaques = 0.5f;
 
-    [Header("MELEE")]
+    [Header("Melee")]
     [SerializeField]
     private WeaponMeleeTrigger meleeTrigger;
 
@@ -23,12 +23,9 @@ public class WeaponSystem : MonoBehaviour
     [SerializeField]
     private float tiempoHitbox = 0.2f;
 
-    [Header("ARMA DE FUEGO")]
+    [Header("Disparo")]
     [SerializeField]
-    private bool armaAutomatica = false;
-
-    [SerializeField]
-    private GameObject prefabBala;
+    private bool armaAutomatica;
 
     [SerializeField]
     private Transform puntoDisparo;
@@ -40,7 +37,7 @@ public class WeaponSystem : MonoBehaviour
     private int balasPorDisparo = 1;
 
     [SerializeField]
-    private float dispersion = 0f;
+    private float dispersion;
 
     [SerializeField]
     private bool usarMunicion = true;
@@ -58,11 +55,16 @@ public class WeaponSystem : MonoBehaviour
     private float tiempoVidaBala = 5f;
 
     [SerializeField]
-    private bool atravesarEnemigos = false;
+    private bool atravesarEnemigos;
 
-    [Header("DEBUG")]
+    [Header("Pool")]
     [SerializeField]
-    private bool mostrarLogs = false;
+    private string idPoolBala =
+        "bala";
+
+    [Header("Debug")]
+    [SerializeField]
+    private bool mostrarLogs;
 
     private float siguienteAtaque;
 
@@ -77,15 +79,22 @@ public class WeaponSystem : MonoBehaviour
 
     private void Update()
     {
-        if (Time.time < siguienteAtaque)
+        if (
+            Time.time <
+            siguienteAtaque
+        )
+        {
             return;
+        }
 
         switch (tipoArma)
         {
             case WeaponType.Melee:
 
                 if (
-                    Input.GetMouseButtonDown(0)
+                    Input.GetMouseButtonDown(
+                        0
+                    )
                 )
                 {
                     AtaqueMelee();
@@ -98,7 +107,9 @@ public class WeaponSystem : MonoBehaviour
                 if (armaAutomatica)
                 {
                     if (
-                        Input.GetMouseButton(0)
+                        Input.GetMouseButton(
+                            0
+                        )
                     )
                     {
                         Disparar();
@@ -107,7 +118,9 @@ public class WeaponSystem : MonoBehaviour
                 else
                 {
                     if (
-                        Input.GetMouseButtonDown(0)
+                        Input.GetMouseButtonDown(
+                            0
+                        )
                     )
                     {
                         Disparar();
@@ -124,7 +137,9 @@ public class WeaponSystem : MonoBehaviour
             Time.time +
             tiempoEntreAtaques;
 
-        if (animator != null)
+        if (
+            animator != null
+        )
         {
             animator.SetTrigger(
                 "Atacar"
@@ -145,18 +160,28 @@ public class WeaponSystem : MonoBehaviour
 
     public void ActivarMelee()
     {
-        if (meleeTrigger == null)
+        if (
+            meleeTrigger == null
+        )
+        {
             return;
+        }
 
-        meleeTrigger.ActivarTrigger();
+        meleeTrigger
+            .ActivarTrigger();
     }
 
     public void DesactivarMelee()
     {
-        if (meleeTrigger == null)
+        if (
+            meleeTrigger == null
+        )
+        {
             return;
+        }
 
-        meleeTrigger.DesactivarTrigger();
+        meleeTrigger
+            .DesactivarTrigger();
     }
 
     private void Disparar()
@@ -166,13 +191,6 @@ public class WeaponSystem : MonoBehaviour
             municionActual <= 0
         )
         {
-            if (mostrarLogs)
-            {
-                Debug.Log(
-                    "Sin munición"
-                );
-            }
-
             return;
         }
 
@@ -185,7 +203,9 @@ public class WeaponSystem : MonoBehaviour
             municionActual--;
         }
 
-        if (efectoDisparo != null)
+        if (
+            efectoDisparo != null
+        )
         {
             efectoDisparo.Play();
         }
@@ -203,8 +223,15 @@ public class WeaponSystem : MonoBehaviour
     private void CrearBala()
     {
         if (
-            prefabBala == null ||
             puntoDisparo == null
+        )
+        {
+            return;
+        }
+
+        if (
+            PoolManager.Instance ==
+            null
         )
         {
             return;
@@ -228,7 +255,7 @@ public class WeaponSystem : MonoBehaviour
                 )
             );
 
-        Vector3 puntoObjetivo;
+        Vector3 objetivo;
 
         if (
             Physics.Raycast(
@@ -238,12 +265,12 @@ public class WeaponSystem : MonoBehaviour
             )
         )
         {
-            puntoObjetivo =
+            objetivo =
                 hit.point;
         }
         else
         {
-            puntoObjetivo =
+            objetivo =
                 ray.origin +
                 ray.direction *
                 1000f;
@@ -251,42 +278,47 @@ public class WeaponSystem : MonoBehaviour
 
         Vector3 direccion =
             (
-                puntoObjetivo -
+                objetivo -
                 puntoDisparo.position
             ).normalized;
 
-        direccion += new Vector3(
+        direccion +=
+            new Vector3(
 
-            Random.Range(
-                -dispersion,
-                dispersion
-            ),
+                Random.Range(
+                    -dispersion,
+                    dispersion
+                ),
 
-            Random.Range(
-                -dispersion,
-                dispersion
-            ),
+                Random.Range(
+                    -dispersion,
+                    dispersion
+                ),
 
-            Random.Range(
-                -dispersion,
-                dispersion
-            )
-        );
+                Random.Range(
+                    -dispersion,
+                    dispersion
+                )
+            );
 
         direccion.Normalize();
 
-        GameObject nuevaBala =
-            Instantiate(
-                prefabBala,
+        GameObject balaObj =
+            PoolManager.Instance
+            .ObtenerObjeto(
+                idPoolBala,
                 puntoDisparo.position,
                 Quaternion.LookRotation(
                     direccion
                 )
             );
 
+        if (balaObj == null)
+            return;
+
         Bala bala =
-            nuevaBala
-            .GetComponent<Bala>();
+            balaObj.GetComponent
+            <Bala>();
 
         if (bala != null)
         {
@@ -315,7 +347,8 @@ public class WeaponSystem : MonoBehaviour
         return danio;
     }
 
-    public WeaponType ObtenerTipoArma()
+    public WeaponType
+        ObtenerTipoArma()
     {
         return tipoArma;
     }
@@ -325,7 +358,8 @@ public class WeaponSystem : MonoBehaviour
         return municionActual;
     }
 
-    public int ObtenerMunicionMaxima()
+    public int
+        ObtenerMunicionMaxima()
     {
         return municionMaxima;
     }

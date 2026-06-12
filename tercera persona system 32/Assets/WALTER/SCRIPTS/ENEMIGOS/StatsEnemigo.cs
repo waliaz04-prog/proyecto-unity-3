@@ -31,7 +31,7 @@ public class StatsEnemigo : MonoBehaviour
     [SerializeField]
     private int puntosBase = 10;
 
-    [Header("Escalado Por Oleada")]
+    [Header("Escalado")]
     [SerializeField]
     private float aumentoVida = 0.15f;
 
@@ -58,19 +58,22 @@ public class StatsEnemigo : MonoBehaviour
     private float aceleracionActual;
     private float resistenciaActual;
 
-    private NavMeshAgent agent;
-    private ControladorEnemigo controlador;
-
     private bool muerto;
 
-    public float VidaActual => vidaActual;
-    public float VidaMaxima => vidaBase;
+    private NavMeshAgent agent;
 
-    public float Danio => danioActual;
-    public float VelocidadAtaque => velocidadAtaqueActual;
-    public float VelocidadMovimiento => velocidadMovimientoActual;
-    public float Aceleracion => aceleracionActual;
-    public float Resistencia => resistenciaActual;
+    private ControladorEnemigo controlador;
+
+    private EnemyAttack enemyAttack;
+
+    public float VidaActual =>
+        vidaActual;
+
+    public float VidaMaxima =>
+        vidaBase;
+
+    public float Danio =>
+        danioActual;
 
     private void Awake()
     {
@@ -79,6 +82,9 @@ public class StatsEnemigo : MonoBehaviour
 
         controlador =
             GetComponent<ControladorEnemigo>();
+
+        enemyAttack =
+            GetComponent<EnemyAttack>();
 
         AplicarStatsBase();
     }
@@ -174,14 +180,22 @@ public class StatsEnemigo : MonoBehaviour
 
     private void AplicarMovimiento()
     {
-        if (agent == null)
-            return;
+        if (agent != null)
+        {
+            agent.speed =
+                velocidadMovimientoActual;
 
-        agent.speed =
-            velocidadMovimientoActual;
+            agent.acceleration =
+                aceleracionActual;
+        }
 
-        agent.acceleration =
-            aceleracionActual;
+        if (enemyAttack != null)
+        {
+            enemyAttack
+                .ConfigurarDanio(
+                    danioActual
+                );
+        }
     }
 
     public void RecibirDanio(
@@ -204,9 +218,7 @@ public class StatsEnemigo : MonoBehaviour
         {
             Debug.Log(
                 gameObject.name +
-                " recibió " +
-                danioFinal +
-                " de daño."
+                " recibió daño"
             );
         }
 
@@ -229,7 +241,9 @@ public class StatsEnemigo : MonoBehaviour
         }
         else
         {
-            gameObject.SetActive(false);
+            gameObject.SetActive(
+                false
+            );
         }
     }
 
@@ -240,6 +254,7 @@ public class StatsEnemigo : MonoBehaviour
 
     public float ObtenerPorcentajeVida()
     {
-        return vidaActual / vidaBase;
+        return vidaActual /
+               vidaBase;
     }
 }

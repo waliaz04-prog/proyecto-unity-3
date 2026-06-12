@@ -6,7 +6,7 @@ public class ControladorEnemigo : MonoBehaviour
 {
     public Action OnEnemyDeath;
 
-    [Header("Tipo Enemigo")]
+    [Header("Tipo")]
     [SerializeField]
     private TipoEnemigo tipoEnemigo =
         TipoEnemigo.Alien;
@@ -18,17 +18,21 @@ public class ControladorEnemigo : MonoBehaviour
     private bool muerto;
 
     private StatsEnemigo statsEnemigo;
+
     private PoolObject poolObject;
 
-    public bool Muerto => muerto;
+    public bool Muerto =>
+        muerto;
 
     private void Awake()
     {
         statsEnemigo =
-            GetComponent<StatsEnemigo>();
+            GetComponent<
+                StatsEnemigo>();
 
         poolObject =
-            GetComponent<PoolObject>();
+            GetComponent<
+                PoolObject>();
     }
 
     private void OnEnable()
@@ -51,11 +55,11 @@ public class ControladorEnemigo : MonoBehaviour
         {
             Debug.Log(
                 gameObject.name +
-                " eliminado."
+                " eliminado"
             );
         }
 
-        RegresarAlPool();
+        RegresarPool();
     }
 
     private void RegistrarMuerte()
@@ -80,17 +84,18 @@ public class ControladorEnemigo : MonoBehaviour
                 break;
         }
 
-        int puntosBase = 0;
+        int puntos = 0;
 
         if (statsEnemigo != null)
         {
-            puntosBase =
-                statsEnemigo.ObtenerPuntos();
+            puntos =
+                statsEnemigo
+                .ObtenerPuntos();
         }
 
         int puntosFinales =
             Mathf.RoundToInt(
-                puntosBase *
+                puntos *
                 GameManager.Instance
                 .ObtenerMultiplicadorPuntos()
             );
@@ -101,19 +106,24 @@ public class ControladorEnemigo : MonoBehaviour
             );
     }
 
-    private void RegresarAlPool()
+    private void RegresarPool()
     {
         if (poolObject != null)
         {
-            poolObject.RegresarAlPool();
+            poolObject
+                .RegresarAlPool();
         }
         else
         {
-            gameObject.SetActive(false);
+            gameObject
+                .SetActive(
+                    false
+                );
         }
     }
 
-    [ContextMenu("Matar Enemigo")]
+    [ContextMenu(
+        "Matar Enemigo")]
     private void DebugMorir()
     {
         Morir();

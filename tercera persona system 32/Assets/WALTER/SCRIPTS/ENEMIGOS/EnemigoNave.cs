@@ -74,6 +74,8 @@ public class EnemigoNave : MonoBehaviour
 
     private NavMeshAgent agent;
 
+    private DisparadorEnemigo disparadorEnemigo;
+
     private Vector3 destinoActual;
 
     private float timerDestino;
@@ -86,6 +88,9 @@ public class EnemigoNave : MonoBehaviour
     {
         agent =
             GetComponent<NavMeshAgent>();
+
+        disparadorEnemigo =
+            GetComponent<DisparadorEnemigo>();
 
         ConfigurarAgente();
 
@@ -127,13 +132,17 @@ public class EnemigoNave : MonoBehaviour
                 jugador.position
             );
 
-        if (distanciaJugador <=
-            distanciaDeteccion)
+        if (
+            distanciaJugador <=
+            distanciaDeteccion
+        )
         {
             SeguirJugador();
 
-            if (distanciaJugador <=
-                distanciaAtaque)
+            if (
+                distanciaJugador <=
+                distanciaAtaque
+            )
             {
                 AtacarJugador();
             }
@@ -166,7 +175,8 @@ public class EnemigoNave : MonoBehaviour
     private void BuscarJugador()
     {
         GameObject player =
-            GameObject.FindGameObjectWithTag(
+            GameObject
+            .FindGameObjectWithTag(
                 "Player"
             );
 
@@ -174,6 +184,17 @@ public class EnemigoNave : MonoBehaviour
         {
             jugador =
                 player.transform;
+
+            if (
+                disparadorEnemigo !=
+                null
+            )
+            {
+                disparadorEnemigo
+                .ConfigurarObjetivo(
+                    jugador
+                );
+            }
         }
     }
 
@@ -184,19 +205,20 @@ public class EnemigoNave : MonoBehaviour
 
         NavMeshHit hit;
 
-        if (NavMesh.SamplePosition(
-            transform.position,
-            out hit,
-            20f,
-            NavMesh.AllAreas))
+        if (
+            NavMesh.SamplePosition(
+                transform.position,
+                out hit,
+                20f,
+                NavMesh.AllAreas
+            )
+        )
         {
             agent.Warp(
                 hit.position
             );
         }
     }
-
-    #region Movimiento
 
     private void Patrullar()
     {
@@ -212,10 +234,13 @@ public class EnemigoNave : MonoBehaviour
                 destinoActual
             );
 
-        if (distancia <=
-            distanciaNuevoDestino ||
+        if (
+            distancia <=
+            distanciaNuevoDestino
+            ||
             timerDestino >=
-            tiempoMaximoDestino)
+            tiempoMaximoDestino
+        )
         {
             GenerarNuevoDestino();
         }
@@ -230,15 +255,19 @@ public class EnemigoNave : MonoBehaviour
         timerDestino = 0f;
 
         Vector3 punto =
-            zonaVuelo.ObtenerPuntoAleatorio();
+            zonaVuelo
+            .ObtenerPuntoAleatorio();
 
         NavMeshHit hit;
 
-        if (NavMesh.SamplePosition(
-            punto,
-            out hit,
-            radioBusquedaNavMesh,
-            NavMesh.AllAreas))
+        if (
+            NavMesh.SamplePosition(
+                punto,
+                out hit,
+                radioBusquedaNavMesh,
+                NavMesh.AllAreas
+            )
+        )
         {
             destinoActual =
                 hit.position;
@@ -259,8 +288,10 @@ public class EnemigoNave : MonoBehaviour
 
         direccion.y = 0f;
 
-        if (direccion.sqrMagnitude <
-            0.01f)
+        if (
+            direccion.sqrMagnitude <
+            0.01f
+        )
         {
             return;
         }
@@ -281,101 +312,140 @@ public class EnemigoNave : MonoBehaviour
 
     private void ActualizarAlturaVisual()
     {
-        if (modeloVisual == null)
+        if (
+            modeloVisual == null
+        )
+        {
             return;
+        }
 
         Vector3 posicion =
-            modeloVisual.localPosition;
+            modeloVisual
+            .localPosition;
 
         posicion.y =
             alturaVisual;
 
-        modeloVisual.localPosition =
+        modeloVisual
+            .localPosition =
             posicion;
     }
 
-    #endregion
-
-    #region Ataque
-
     private void AtacarJugador()
     {
-        // Aquí irán los proyectiles
-        // cuando los creemos.
+        if (
+            disparadorEnemigo ==
+            null
+        )
+        {
+            return;
+        }
+
+        disparadorEnemigo
+            .IntentarDisparar();
     }
-
-    #endregion
-
-    #region Spawn
 
     private IEnumerator RutinaSpawn()
     {
-        yield return new WaitForSeconds(
-            tiempoAntesGenerar
-        );
+        yield return
+            new WaitForSeconds(
+                tiempoAntesGenerar
+            );
 
         while (true)
         {
-            if (aliensGenerados <
-                maximoAliensPorNave)
+            if (
+                aliensGenerados <
+                maximoAliensPorNave
+            )
             {
-                if (aliensActivos <
-                    maximoAliensGlobales)
+                if (
+                    aliensActivos <
+                    maximoAliensGlobales
+                )
                 {
                     CrearAlien();
                 }
             }
 
-            yield return new WaitForSeconds(
-                tiempoEntreSpawns
-            );
+            yield return
+                new WaitForSeconds(
+                    tiempoEntreSpawns
+                );
         }
     }
 
     private void CrearAlien()
     {
-        if (PoolManager.Instance == null)
+        if (
+            PoolManager.Instance ==
+            null
+        )
+        {
             return;
+        }
 
-        if (puntoSpawn == null)
+        if (
+            puntoSpawn == null
+        )
+        {
             return;
+        }
 
         NavMeshHit hit;
 
-        if (NavMesh.SamplePosition(
-            puntoSpawn.position,
-            out hit,
-            radioBusquedaNavMesh,
-            NavMesh.AllAreas))
+        if (
+            NavMesh.SamplePosition(
+                puntoSpawn.position,
+                out hit,
+                radioBusquedaNavMesh,
+                NavMesh.AllAreas
+            )
+        )
         {
             GameObject alien =
-                PoolManager.Instance
+                PoolManager
+                .Instance
                 .ObtenerObjeto(
                     idPoolAlien,
                     hit.position,
                     Quaternion.identity
                 );
 
-            if (alien == null)
+            if (
+                alien == null
+            )
+            {
                 return;
+            }
 
             aliensGenerados++;
             aliensActivos++;
 
-            ControladorEnemigo controlador =
-                alien.GetComponent
-                <ControladorEnemigo>();
+            ControladorEnemigo
+            controlador =
+            alien.GetComponent
+            <
+                ControladorEnemigo
+            >();
 
-            if (controlador != null)
+            if (
+                controlador !=
+                null
+            )
             {
-                controlador.OnEnemyDeath -=
-                    ReducirContador;
+                controlador
+                .OnEnemyDeath -=
+                ReducirContador;
 
-                controlador.OnEnemyDeath +=
-                    ReducirContador;
+                controlador
+                .OnEnemyDeath +=
+                ReducirContador;
             }
 
-            if (mostrarLogs)
+            if (
+                mostrarLogs
+            )
             {
                 Debug.Log(
                     "Alien generado por nave"
@@ -388,18 +458,22 @@ public class EnemigoNave : MonoBehaviour
     {
         aliensActivos--;
 
-        if (aliensActivos < 0)
+        if (
+            aliensActivos < 0
+        )
         {
             aliensActivos = 0;
         }
     }
 
-    #endregion
-
     private void OnDrawGizmosSelected()
     {
-        if (!mostrarGizmos)
+        if (
+            !mostrarGizmos
+        )
+        {
             return;
+        }
 
         Gizmos.color =
             Color.yellow;

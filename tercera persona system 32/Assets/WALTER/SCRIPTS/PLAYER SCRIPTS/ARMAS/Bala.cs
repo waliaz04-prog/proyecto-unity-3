@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(PoolObject))]
 [RequireComponent(typeof(Collider))]
 public class Bala : MonoBehaviour
 {
@@ -15,17 +16,33 @@ public class Bala : MonoBehaviour
 
     private float tiempoActual;
 
+    private PoolObject poolObject;
+
+    private void Awake()
+    {
+        poolObject =
+            GetComponent<PoolObject>();
+    }
+
+    private void OnEnable()
+    {
+        tiempoActual = 0f;
+    }
+
     public void Configurar(
         float nuevoDanio,
         float nuevaVelocidad,
         float nuevoTiempoVida,
         bool puedeAtravesar)
     {
-        danio = nuevoDanio;
+        danio =
+            nuevoDanio;
 
-        velocidad = nuevaVelocidad;
+        velocidad =
+            nuevaVelocidad;
 
-        tiempoVida = nuevoTiempoVida;
+        tiempoVida =
+            nuevoTiempoVida;
 
         atravesarEnemigos =
             puedeAtravesar;
@@ -43,23 +60,20 @@ public class Bala : MonoBehaviour
         tiempoActual +=
             Time.deltaTime;
 
-        if (tiempoActual >=
-            tiempoVida)
+        if (
+            tiempoActual >=
+            tiempoVida
+        )
         {
-            DestruirBala();
+            DesactivarBala();
         }
     }
 
     private void OnTriggerEnter(
         Collider other)
     {
-        // IGNORAR TRIGGERS
         if (other.isTrigger)
             return;
-
-        //------------------------------------------------
-        // ENEMIGOS
-        //------------------------------------------------
 
         StatsEnemigo enemigo =
             other.GetComponentInParent
@@ -74,22 +88,19 @@ public class Bala : MonoBehaviour
             if (mostrarLogs)
             {
                 Debug.Log(
-                    "Impacto en enemigo: "
-                    + enemigo.name
+                    "Impacto enemigo"
                 );
             }
 
-            if (!atravesarEnemigos)
+            if (
+                !atravesarEnemigos
+            )
             {
-                DestruirBala();
+                DesactivarBala();
             }
 
             return;
         }
-
-        //------------------------------------------------
-        // JUGADOR
-        //------------------------------------------------
 
         VidaPlayer jugador =
             other.GetComponentInParent
@@ -104,24 +115,29 @@ public class Bala : MonoBehaviour
             if (mostrarLogs)
             {
                 Debug.Log(
-                    "Impacto en jugador"
+                    "Impacto jugador"
                 );
             }
 
-            DestruirBala();
+            DesactivarBala();
 
             return;
         }
 
-        //------------------------------------------------
-        // CUALQUIER OTRO OBJETO
-        //------------------------------------------------
-
-        DestruirBala();
+        DesactivarBala();
     }
 
-    private void DestruirBala()
+    private void DesactivarBala()
     {
-        Destroy(gameObject);
+        if (poolObject != null)
+        {
+            poolObject
+                .RegresarAlPool();
+        }
+        else
+        {
+            gameObject
+                .SetActive(false);
+        }
     }
 }

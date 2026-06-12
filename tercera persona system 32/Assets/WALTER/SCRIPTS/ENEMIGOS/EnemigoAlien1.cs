@@ -10,7 +10,10 @@ public class EnemigoAlien1 : MonoBehaviour
 
     [Header("Movimiento")]
     [SerializeField]
-    private float distanciaMinima = 2.5f;
+    private float distanciaIdeal = 3f;
+
+    [SerializeField]
+    private float toleranciaDistancia = 0.5f;
 
     [SerializeField]
     private float frecuenciaActualizacionRuta = 0.2f;
@@ -32,11 +35,15 @@ public class EnemigoAlien1 : MonoBehaviour
     [SerializeField]
     private float distanciaWarpNavMesh = 20f;
 
+    [SerializeField]
+    private float radioBusquedaNavMesh = 5f;
+
     [Header("Debug")]
     [SerializeField]
     private bool mostrarGizmos = true;
 
     private NavMeshAgent agent;
+    private DisparadorEnemigo disparadorEnemigo;
 
     private float timerRuta;
 
@@ -44,6 +51,9 @@ public class EnemigoAlien1 : MonoBehaviour
     {
         agent =
             GetComponent<NavMeshAgent>();
+
+        disparadorEnemigo =
+            GetComponent<DisparadorEnemigo>();
 
         ConfigurarAgente();
 
@@ -76,6 +86,11 @@ public class EnemigoAlien1 : MonoBehaviour
         ActualizarMovimiento();
 
         RotarHaciaJugador();
+
+        if (disparadorEnemigo != null)
+        {
+            disparadorEnemigo.IntentarDisparar();
+        }
     }
 
     private void ConfigurarAgente()
@@ -116,7 +131,8 @@ public class EnemigoAlien1 : MonoBehaviour
             );
 
         if (distancia >
-            distanciaMinima)
+            distanciaIdeal +
+            toleranciaDistancia)
         {
             agent.isStopped =
                 false;
@@ -124,6 +140,43 @@ public class EnemigoAlien1 : MonoBehaviour
             agent.SetDestination(
                 jugador.position
             );
+        }
+        else if (
+            distancia <
+            distanciaIdeal -
+            toleranciaDistancia)
+        {
+            Vector3 direccion =
+                (
+                    transform.position -
+                    jugador.position
+                ).normalized;
+
+            Vector3 posicionRetirada =
+                jugador.position +
+                (
+                    direccion *
+                    distanciaIdeal
+                );
+
+            NavMeshHit hit;
+
+            if (
+                NavMesh.SamplePosition(
+                    posicionRetirada,
+                    out hit,
+                    radioBusquedaNavMesh,
+                    NavMesh.AllAreas
+                )
+            )
+            {
+                agent.isStopped =
+                    false;
+
+                agent.SetDestination(
+                    hit.position
+                );
+            }
         }
         else
         {
@@ -143,6 +196,14 @@ public class EnemigoAlien1 : MonoBehaviour
         {
             jugador =
                 player.transform;
+
+            if (disparadorEnemigo != null)
+            {
+                disparadorEnemigo
+                    .ConfigurarObjetivo(
+                        jugador
+                    );
+            }
         }
     }
 
@@ -152,11 +213,14 @@ public class EnemigoAlien1 : MonoBehaviour
         {
             NavMeshHit hit;
 
-            if (NavMesh.SamplePosition(
-                transform.position,
-                out hit,
-                distanciaWarpNavMesh,
-                NavMesh.AllAreas))
+            if (
+                NavMesh.SamplePosition(
+                    transform.position,
+                    out hit,
+                    distanciaWarpNavMesh,
+                    NavMesh.AllAreas
+                )
+            )
             {
                 agent.Warp(
                     hit.position
@@ -176,8 +240,10 @@ public class EnemigoAlien1 : MonoBehaviour
 
         direccion.y = 0f;
 
-        if (direccion.sqrMagnitude <
-            0.01f)
+        if (
+            direccion.sqrMagnitude <
+            0.01f
+        )
         {
             return;
         }
@@ -206,7 +272,16 @@ public class EnemigoAlien1 : MonoBehaviour
 
         Gizmos.DrawWireSphere(
             transform.position,
-            distanciaMinima
+            distanciaIdeal
+        );
+
+        Gizmos.color =
+            Color.yellow;
+
+        Gizmos.DrawWireSphere(
+            transform.position,
+            distanciaIdeal +
+            toleranciaDistancia
         );
     }
 }

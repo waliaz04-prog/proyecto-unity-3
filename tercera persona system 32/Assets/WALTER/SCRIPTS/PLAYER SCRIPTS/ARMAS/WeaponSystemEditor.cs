@@ -44,8 +44,6 @@ public class WeaponSystemEditor : Editor
 
         switch (tipo)
         {
-            // MELEE
-
             case WeaponType.Melee:
 
                 EditorGUILayout.LabelField(
@@ -72,7 +70,6 @@ public class WeaponSystemEditor : Editor
                 );
 
                 break;
-            // FIREARM
 
             case WeaponType.Firearm:
 
@@ -114,7 +111,7 @@ public class WeaponSystemEditor : Editor
 
                 EditorGUILayout.PropertyField(
                     serializedObject.FindProperty(
-                        "prefabBala"
+                        "idPoolBala"
                     )
                 );
 

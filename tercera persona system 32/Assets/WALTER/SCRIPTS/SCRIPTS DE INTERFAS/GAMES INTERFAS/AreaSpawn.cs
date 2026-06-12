@@ -17,13 +17,16 @@ public class AreaSpawn : MonoBehaviour
 
     public Vector3 ObtenerPuntoAleatorio()
     {
-        Vector3 centro =
-            transform.position;
-
         float randomX =
             Random.Range(
                 -tamañoArea.x * 0.5f,
                 tamañoArea.x * 0.5f
+            );
+
+        float randomY =
+            Random.Range(
+                -tamañoArea.y * 0.5f,
+                tamañoArea.y * 0.5f
             );
 
         float randomZ =
@@ -32,10 +35,15 @@ public class AreaSpawn : MonoBehaviour
                 tamañoArea.z * 0.5f
             );
 
-        return new Vector3(
-            centro.x + randomX,
-            centro.y,
-            centro.z + randomZ
+        Vector3 puntoLocal =
+            new Vector3(
+                randomX,
+                randomY,
+                randomZ
+            );
+
+        return transform.TransformPoint(
+            puntoLocal
         );
     }
 
@@ -54,6 +62,9 @@ public class AreaSpawn : MonoBehaviour
         if (!mostrarGizmos)
             return;
 
+        Gizmos.matrix =
+            transform.localToWorldMatrix;
+
         Gizmos.color =
             new Color(
                 0f,
@@ -63,7 +74,7 @@ public class AreaSpawn : MonoBehaviour
             );
 
         Gizmos.DrawCube(
-            transform.position,
+            Vector3.zero,
             tamañoArea
         );
 
@@ -71,7 +82,7 @@ public class AreaSpawn : MonoBehaviour
             Color.green;
 
         Gizmos.DrawWireCube(
-            transform.position,
+            Vector3.zero,
             tamañoArea
         );
     }
