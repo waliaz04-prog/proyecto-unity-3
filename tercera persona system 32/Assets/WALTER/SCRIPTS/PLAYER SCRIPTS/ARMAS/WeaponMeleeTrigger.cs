@@ -5,65 +5,38 @@ using UnityEngine;
 public class WeaponMeleeTrigger : MonoBehaviour
 {
     [Header("Referencias")]
-    [SerializeField]
-    private WeaponSystem weaponSystem;
+    [SerializeField] private WeaponSystem weaponSystem;
 
     private Collider triggerCollider;
-
-    private List<StatsEnemigo>
-        enemigosGolpeados =
-        new List<StatsEnemigo>();
+    private readonly List<StatsEnemigo> enemigosGolpeados = new List<StatsEnemigo>();
 
     private void Awake()
     {
-        triggerCollider =
-            GetComponent<Collider>();
-
-        triggerCollider.isTrigger =
-            true;
-
-        triggerCollider.enabled =
-            false;
+        triggerCollider = GetComponent<Collider>();
+        triggerCollider.isTrigger = true;
+        triggerCollider.enabled = false;
     }
 
     public void ActivarTrigger()
     {
         enemigosGolpeados.Clear();
-
-        triggerCollider.enabled =
-            true;
+        triggerCollider.enabled = true;
     }
 
     public void DesactivarTrigger()
     {
-        triggerCollider.enabled =
-            false;
+        triggerCollider.enabled = false;
     }
 
-    private void OnTriggerEnter(
-        Collider other)
+    private void OnTriggerEnter(Collider other)
     {
-        StatsEnemigo enemigo =
-            other.GetComponentInParent
-            <StatsEnemigo>();
+        if (!other.TryGetComponent(out StatsEnemigo enemigo))
+            enemigo = other.GetComponentInParent<StatsEnemigo>();
 
-        if (enemigo == null)
-            return;
+        if (enemigo == null) return;
+        if (enemigosGolpeados.Contains(enemigo)) return;
 
-        if (
-            enemigosGolpeados
-            .Contains(enemigo)
-        )
-        {
-            return;
-        }
-
-        enemigosGolpeados
-            .Add(enemigo);
-
-        enemigo.RecibirDanio(
-            weaponSystem
-            .ObtenerDanio()
-        );
+        enemigosGolpeados.Add(enemigo);
+        enemigo.RecibirDanio(weaponSystem.ObtenerDanio());
     }
 }

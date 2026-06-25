@@ -44,4 +44,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3d4367813e83914fa8b5f718ee204e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemigosEliminados: 0
+  multiplicadorPuntosPorOleada: 0.2
+  mostrarLogs: 1
+  aliensEliminados: 0
+  navesEliminadas: 0
+  enemigosTotalesEliminados: 0
+  puntosActuales: 0
+  puntosGanados: 0
+  puntosGastados: 0
+  tiempoSobrevivido: 0
+  oleadaActual: 1
+  oleadaMaxima: 1

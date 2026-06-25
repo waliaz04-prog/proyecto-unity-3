@@ -7,32 +7,21 @@ public class ControladorEnemigo : MonoBehaviour
     public Action OnEnemyDeath;
 
     [Header("Tipo")]
-    [SerializeField]
-    private TipoEnemigo tipoEnemigo =
-        TipoEnemigo.Alien;
+    [SerializeField] private TipoEnemigo tipoEnemigo = TipoEnemigo.Alien;
 
     [Header("Debug")]
-    [SerializeField]
-    private bool mostrarLogs = false;
+    [SerializeField] private bool mostrarLogs = false;
 
     private bool muerto;
-
     private StatsEnemigo statsEnemigo;
-
     private PoolObject poolObject;
 
-    public bool Muerto =>
-        muerto;
+    public bool Muerto => muerto;
 
     private void Awake()
     {
-        statsEnemigo =
-            GetComponent<
-                StatsEnemigo>();
-
-        poolObject =
-            GetComponent<
-                PoolObject>();
+        statsEnemigo = GetComponent<StatsEnemigo>();
+        poolObject = GetComponent<PoolObject>();
     }
 
     private void OnEnable()
@@ -42,90 +31,41 @@ public class ControladorEnemigo : MonoBehaviour
 
     public void Morir()
     {
-        if (muerto)
-            return;
-
+        if (muerto) return;
         muerto = true;
-
         RegistrarMuerte();
-
         OnEnemyDeath?.Invoke();
-
-        if (mostrarLogs)
-        {
-            Debug.Log(
-                gameObject.name +
-                " eliminado"
-            );
-        }
-
+        if (mostrarLogs) Debug.Log(gameObject.name + " eliminado");
         RegresarPool();
     }
 
     private void RegistrarMuerte()
     {
-        if (GameManager.Instance == null)
-            return;
+        if (GameManager.Instance == null) return;
 
         switch (tipoEnemigo)
         {
             case TipoEnemigo.Alien:
-
-                GameManager.Instance
-                    .RegistrarAlienEliminado();
-
+                GameManager.Instance.RegistrarAlienEliminado();
                 break;
-
             case TipoEnemigo.Nave:
-
-                GameManager.Instance
-                    .RegistrarNaveEliminada();
-
+                GameManager.Instance.RegistrarNaveEliminada();
                 break;
         }
 
-        int puntos = 0;
-
-        if (statsEnemigo != null)
-        {
-            puntos =
-                statsEnemigo
-                .ObtenerPuntos();
-        }
-
-        int puntosFinales =
-            Mathf.RoundToInt(
-                puntos *
-                GameManager.Instance
-                .ObtenerMultiplicadorPuntos()
-            );
-
-        GameManager.Instance
-            .AgregarPuntos(
-                puntosFinales
-            );
+        int puntos = statsEnemigo != null ? statsEnemigo.ObtenerPuntos() : 0;
+        int puntosFinales = Mathf.RoundToInt(puntos * GameManager.Instance.ObtenerMultiplicadorPuntos());
+        GameManager.Instance.AgregarPuntos(puntosFinales);
     }
 
     private void RegresarPool()
     {
         if (poolObject != null)
-        {
-            poolObject
-                .RegresarAlPool();
-        }
+            poolObject.RegresarAlPool();
         else
-        {
-            gameObject
-                .SetActive(
-                    false
-                );
-        }
+            gameObject.SetActive(false);
     }
 
-    [ContextMenu(
-        "Matar Enemigo")]
-    private void DebugMorir()
-    {
-        Morir();
-    }
+    [ContextMenu("Matar Enemigo")]
+    private void DebugMorir() => Morir();
 }

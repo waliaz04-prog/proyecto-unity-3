@@ -129,7 +129,7 @@ GameObject:
   - component: {fileID: 7353547253754505695}
   - component: {fileID: 4314227262553275011}
   - component: {fileID: 4453484491522933720}
-  - component: {fileID: 7425146962474316916}
+  - component: {fileID: -1376629622420275427}
   m_Layer: 7
   m_Name: nave prototipo 1
   m_TagString: Enemy
@@ -375,7 +375,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   jugador: {fileID: 5992309312074546384, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
---- !u!114 &7425146962474316916
+--- !u!114 &-1376629622420275427
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -384,13 +384,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 7771242586143431321}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fea28b25fcf871478f0bdb955213ff8, type: 3}
+  m_Script: {fileID: 11500000, guid: 704f63db7e7765e498997dac2c76ecd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  modoAtaque: 1
   danio: 10
   tiempoEntreAtaques: 2
   distanciaAtaque: 2.5
-  jugador: {fileID: 5992309312074546384, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
+  objetivo: {fileID: 5992309312074546384, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
   mostrarLogs: 0
 --- !u!1 &7792223504209502495
 GameObject:

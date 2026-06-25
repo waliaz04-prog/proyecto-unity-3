@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 4302045299658937505}
   - component: {fileID: 5282156335742088179}
   - component: {fileID: 1550136256468897121}
+  - component: {fileID: 588520577262498576}
+  - component: {fileID: 3424405211523107329}
   m_Layer: 0
   m_Name: balas
   m_TagString: Untagged
@@ -138,3 +140,28 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &588520577262498576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749955992947796215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 000dff2e92f08c643b7ae944adaf25f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3424405211523107329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749955992947796215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 704420556dbdd214ab072e6b319beaeb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mostrarLogs: 0

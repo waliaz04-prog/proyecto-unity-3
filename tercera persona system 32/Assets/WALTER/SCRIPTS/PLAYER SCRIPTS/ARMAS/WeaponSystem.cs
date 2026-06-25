@@ -3,364 +3,176 @@ using UnityEngine;
 public class WeaponSystem : MonoBehaviour
 {
     [Header("Tipo")]
-    [SerializeField]
-    private WeaponType tipoArma;
+    [SerializeField] private WeaponType tipoArma;
 
     [Header("General")]
-    [SerializeField]
-    private float danio = 20f;
-
-    [SerializeField]
-    private float tiempoEntreAtaques = 0.5f;
+    [SerializeField] private float danio = 20f;
+    [SerializeField] private float tiempoEntreAtaques = 0.5f;
 
     [Header("Melee")]
-    [SerializeField]
-    private WeaponMeleeTrigger meleeTrigger;
-
-    [SerializeField]
-    private Animator animator;
-
-    [SerializeField]
-    private float tiempoHitbox = 0.2f;
+    [SerializeField] private WeaponMeleeTrigger meleeTrigger;
+    [SerializeField] private Animator animator;
+    [SerializeField] private float tiempoHitbox = 0.2f;
 
     [Header("Disparo")]
-    [SerializeField]
-    private bool armaAutomatica;
-
-    [SerializeField]
-    private Transform puntoDisparo;
-
-    [SerializeField]
-    private ParticleSystem efectoDisparo;
-
-    [SerializeField]
-    private int balasPorDisparo = 1;
-
-    [SerializeField]
-    private float dispersion;
-
-    [SerializeField]
-    private bool usarMunicion = true;
-
-    [SerializeField]
-    private int municionActual = 30;
-
-    [SerializeField]
-    private int municionMaxima = 30;
-
-    [SerializeField]
-    private float velocidadBala = 80f;
-
-    [SerializeField]
-    private float tiempoVidaBala = 5f;
-
-    [SerializeField]
-    private bool atravesarEnemigos;
+    [SerializeField] private bool armaAutomatica;
+    [SerializeField] private Transform puntoDisparo;
+    [SerializeField] private ParticleSystem efectoDisparo;
+    [SerializeField] private int balasPorDisparo = 1;
+    [SerializeField] private float dispersion;
+    [SerializeField] private bool usarMunicion = true;
+    [SerializeField] private int municionActual = 30;
+    [SerializeField] private int municionMaxima = 30;
+    [SerializeField] private float velocidadBala = 80f;
+    [SerializeField] private float tiempoVidaBala = 5f;
+    [SerializeField] private bool atravesarEnemigos;
+    [SerializeField] private float tiempoRecarga = 1.5f;
 
     [Header("Pool")]
-    [SerializeField]
-    private string idPoolBala =
-        "bala";
+    [SerializeField] private string idPoolBala = "bala";
 
     [Header("Debug")]
-    [SerializeField]
-    private bool mostrarLogs;
+    [SerializeField] private bool mostrarLogs;
 
     private float siguienteAtaque;
+    private Camera camaraPrincipal;
+    private readonly Vector3 centroViewport = new Vector3(0.5f, 0.5f, 0f);
 
     private void Awake()
     {
         if (animator == null)
-        {
-            animator =
-                GetComponent<Animator>();
-        }
+            animator = GetComponent<Animator>();
+
+        camaraPrincipal = Camera.main;
     }
 
     private void Update()
     {
-        if (
-            Time.time <
-            siguienteAtaque
-        )
-        {
-            return;
-        }
+        if (Time.time < siguienteAtaque) return;
 
         switch (tipoArma)
         {
             case WeaponType.Melee:
-
-                if (
-                    Input.GetMouseButtonDown(
-                        0
-                    )
-                )
-                {
+                if (Input.GetMouseButtonDown(0))
                     AtaqueMelee();
-                }
-
                 break;
 
             case WeaponType.Firearm:
-
-                if (armaAutomatica)
-                {
-                    if (
-                        Input.GetMouseButton(
-                            0
-                        )
-                    )
-                    {
-                        Disparar();
-                    }
-                }
-                else
-                {
-                    if (
-                        Input.GetMouseButtonDown(
-                            0
-                        )
-                    )
-                    {
-                        Disparar();
-                    }
-                }
-
+                bool disparar = armaAutomatica ? Input.GetMouseButton(0) : Input.GetMouseButtonDown(0);
+                if (disparar) Disparar();
                 break;
         }
+
+        // Recarga manual con tecla R
+        if (Input.GetKeyDown(KeyCode.R))
+            Recargar();
     }
 
     private void AtaqueMelee()
     {
-        siguienteAtaque =
-            Time.time +
-            tiempoEntreAtaques;
+        siguienteAtaque = Time.time + tiempoEntreAtaques;
 
-        if (
-            animator != null
-        )
+        if (animator != null)
         {
-            animator.SetTrigger(
-                "Atacar"
-            );
+            animator.SetTrigger("Atacar");
         }
         else
         {
             ActivarMelee();
-
-            Invoke(
-                nameof(
-                    DesactivarMelee
-                ),
-                tiempoHitbox
-            );
+            Invoke(nameof(DesactivarMelee), tiempoHitbox);
         }
     }
 
     public void ActivarMelee()
     {
-        if (
-            meleeTrigger == null
-        )
-        {
-            return;
-        }
-
-        meleeTrigger
-            .ActivarTrigger();
+        if (meleeTrigger != null)
+            meleeTrigger.ActivarTrigger();
     }
 
     public void DesactivarMelee()
     {
-        if (
-            meleeTrigger == null
-        )
-        {
-            return;
-        }
-
-        meleeTrigger
-            .DesactivarTrigger();
+        if (meleeTrigger != null)
+            meleeTrigger.DesactivarTrigger();
     }
 
     private void Disparar()
     {
-        if (
-            usarMunicion &&
-            municionActual <= 0
-        )
-        {
-            return;
-        }
+        if (usarMunicion && municionActual <= 0) return;
 
-        siguienteAtaque =
-            Time.time +
-            tiempoEntreAtaques;
+        siguienteAtaque = Time.time + tiempoEntreAtaques;
 
         if (usarMunicion)
-        {
             municionActual--;
-        }
 
-        if (
-            efectoDisparo != null
-        )
-        {
+        if (efectoDisparo != null)
             efectoDisparo.Play();
-        }
 
-        for (
-            int i = 0;
-            i < balasPorDisparo;
-            i++
-        )
-        {
+        for (int i = 0; i < balasPorDisparo; i++)
             CrearBala();
-        }
     }
 
     private void CrearBala()
     {
-        if (
-            puntoDisparo == null
-        )
+        if (puntoDisparo == null || PoolManager.Instance == null) return;
+
+        if (camaraPrincipal == null)
+            camaraPrincipal = Camera.main;
+
+        if (camaraPrincipal == null) return;
+
+        Ray ray = camaraPrincipal.ViewportPointToRay(centroViewport);
+        Vector3 objetivo = Physics.Raycast(ray, out RaycastHit hit, 1000f)
+            ? hit.point
+            : ray.origin + ray.direction * 1000f;
+
+        Vector3 direccion = (objetivo - puntoDisparo.position).normalized;
+
+        if (dispersion > 0f)
         {
-            return;
+            direccion += new Vector3(
+                Random.Range(-dispersion, dispersion),
+                Random.Range(-dispersion, dispersion),
+                Random.Range(-dispersion, dispersion));
+            direccion.Normalize();
         }
 
-        if (
-            PoolManager.Instance ==
-            null
-        )
-        {
-            return;
-        }
+        GameObject balaObj = PoolManager.Instance.ObtenerObjeto(
+            idPoolBala, puntoDisparo.position, Quaternion.LookRotation(direccion));
 
-        Camera camara =
-            Camera.main;
+        if (balaObj == null) return;
 
-        if (camara == null)
-        {
-            return;
-        }
-
-        Ray ray =
-            camara
-            .ViewportPointToRay(
-                new Vector3(
-                    0.5f,
-                    0.5f,
-                    0f
-                )
-            );
-
-        Vector3 objetivo;
-
-        if (
-            Physics.Raycast(
-                ray,
-                out RaycastHit hit,
-                1000f
-            )
-        )
-        {
-            objetivo =
-                hit.point;
-        }
-        else
-        {
-            objetivo =
-                ray.origin +
-                ray.direction *
-                1000f;
-        }
-
-        Vector3 direccion =
-            (
-                objetivo -
-                puntoDisparo.position
-            ).normalized;
-
-        direccion +=
-            new Vector3(
-
-                Random.Range(
-                    -dispersion,
-                    dispersion
-                ),
-
-                Random.Range(
-                    -dispersion,
-                    dispersion
-                ),
-
-                Random.Range(
-                    -dispersion,
-                    dispersion
-                )
-            );
-
-        direccion.Normalize();
-
-        GameObject balaObj =
-            PoolManager.Instance
-            .ObtenerObjeto(
-                idPoolBala,
-                puntoDisparo.position,
-                Quaternion.LookRotation(
-                    direccion
-                )
-            );
-
-        if (balaObj == null)
-            return;
-
-        Bala bala =
-            balaObj.GetComponent
-            <Bala>();
-
-        if (bala != null)
-        {
-            bala.Configurar(
-
-                danio,
-
-                velocidadBala,
-
-                tiempoVidaBala,
-
-                atravesarEnemigos
-
-            );
-        }
+        if (balaObj.TryGetComponent(out Bala bala))
+            bala.Configurar(danio, velocidadBala, tiempoVidaBala, atravesarEnemigos, disparadoPorJugador: true);
     }
 
     public void Recargar()
     {
-        municionActual =
-            municionMaxima;
+        municionActual = municionMaxima;
+        if (mostrarLogs) Debug.Log("Recargando: " + gameObject.name);
     }
 
-    public float ObtenerDanio()
+    public float ObtenerDanio() => danio;
+    public WeaponType ObtenerTipoArma() => tipoArma;
+    public int ObtenerMunicion() => municionActual;
+    public int ObtenerMunicionMaxima() => municionMaxima;
+
+    public void SubirDano(float cantidad) => danio += cantidad;
+
+    public void MejorarCadencia(float reduccion)
     {
-        return danio;
+        tiempoEntreAtaques = Mathf.Max(0.05f, tiempoEntreAtaques - reduccion);
     }
 
-    public WeaponType
-        ObtenerTipoArma()
+    public void SubirCapacidadMunicion(int cantidad)
     {
-        return tipoArma;
+        municionMaxima += cantidad;
+        municionActual += cantidad;
     }
 
-    public int ObtenerMunicion()
+    public void MejorarVelocidadRecarga(float reduccion)
     {
-        return municionActual;
+        tiempoRecarga = Mathf.Max(0.1f, tiempoRecarga - reduccion);
     }
 
-    public int
-        ObtenerMunicionMaxima()
-    {
-        return municionMaxima;
-    }
+    public float ObtenerTiempoRecarga() => tiempoRecarga;
 }

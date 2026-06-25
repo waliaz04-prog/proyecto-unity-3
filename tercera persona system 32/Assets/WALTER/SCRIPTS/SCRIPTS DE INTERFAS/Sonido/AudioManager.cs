@@ -5,7 +5,7 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance;
 
-    [Header("Lista de sonidos (efectos y música)")]
+    [Header("Lista de sonidos (efectos y mÃºsica)")]
     public Sonido[] Musica;
 
     private string currentSong;
@@ -15,15 +15,14 @@ public class AudioManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(this.gameObject);
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
-            Destroy(this.gameObject);
+            Destroy(gameObject);
             return;
         }
 
-        // Configurar cada sonido
         foreach (Sonido s in Musica)
         {
             s.source = gameObject.AddComponent<AudioSource>();
@@ -34,65 +33,39 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Reproduce un sonido (no lo repite si ya está sonando y es loop)
-    /// </summary>
+    // Reproduce un sonido. Si es loop no lo reinicia si ya estÃ¡ sonando.
     public void Play(string nombre)
     {
-        Sonido s = Array.Find(Musica, sonido => sonido.name == nombre);
-        if (s == null)
-        {
-            Debug.LogWarning($"AudioManager: No se encontró el sonido '{nombre}'");
-            return;
-        }
+        Sonido s = BuscarSonido(nombre);
+        if (s == null) return;
 
         if (s.loop)
         {
-            if (!s.source.isPlaying)
-                s.source.Play();
+            if (!s.source.isPlaying) s.source.Play();
         }
         else
         {
             s.source.Play();
         }
 
-        if (!s.soundefect)
-            currentSong = s.name;
+        if (!s.soundefect) currentSong = s.name;
     }
 
-    /// <summary>
-    /// Reproduce un sonido como efecto corto, incluso si ya está en uso (no interrumpe loops)
-    /// </summary>
+    // Reproduce un efecto corto sin interrumpir otras fuentes.
     public void PlayOneShot(string nombre)
     {
-        Sonido s = Array.Find(Musica, sonido => sonido.name == nombre);
-        if (s == null)
-        {
-            Debug.LogWarning($"AudioManager: No se encontró el sonido '{nombre}'");
-            return;
-        }
-
+        Sonido s = BuscarSonido(nombre);
+        if (s == null) return;
         s.source.PlayOneShot(s.clip);
     }
 
-    /// <summary>
-    /// Detiene un sonido por nombre
-    /// </summary>
     public void Stop(string nombre)
     {
-        Sonido s = Array.Find(Musica, sonido => sonido.name == nombre);
-        if (s == null)
-        {
-            Debug.LogWarning($"AudioManager: No se encontró el sonido '{nombre}' para detenerlo");
-            return;
-        }
-
+        Sonido s = BuscarSonido(nombre);
+        if (s == null) return;
         s.source.Stop();
     }
 
-    /// <summary>
-    /// Detiene toda la música (no efectos)
-    /// </summary>
     public void StopMusic()
     {
         foreach (Sonido s in Musica)
@@ -103,14 +76,16 @@ public class AudioManager : MonoBehaviour
         currentSong = null;
     }
 
-    /// <summary>
-    /// Verifica si un sonido está sonando
-    /// </summary>
     public bool IsPlaying(string nombre)
     {
+        Sonido s = BuscarSonido(nombre);
+        return s != null && s.source.isPlaying;
+    }
+
+    private Sonido BuscarSonido(string nombre)
+    {
         Sonido s = Array.Find(Musica, sonido => sonido.name == nombre);
-        if (s != null)
-            return s.source.isPlaying;
-        return false;
+        if (s == null) Debug.LogWarning("AudioManager: No se encontrÃ³ el sonido '" + nombre + "'");
+        return s;
     }
 }

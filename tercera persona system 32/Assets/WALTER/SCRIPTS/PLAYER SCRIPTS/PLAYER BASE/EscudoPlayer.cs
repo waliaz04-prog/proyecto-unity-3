@@ -3,27 +3,17 @@ using UnityEngine;
 public class EscudoPlayer : MonoBehaviour
 {
     [Header("Escudo")]
-    [SerializeField]
-    private float escudoMaximo = 100f;
+    [SerializeField] private float escudoMaximo = 100f;
+    [SerializeField] private float tiempoAntesRegenerar = 4f;
+    [SerializeField] private float velocidadRegeneracion = 20f;
 
-    [SerializeField]
-    private float tiempoAntesRegenerar = 4f;
-
-    [SerializeField]
-    private float velocidadRegeneracion = 20f;
-
-    public float EscudoActual
-    {
-        get;
-        private set;
-    }
+    public float EscudoActual { get; private set; }
 
     private float timerRegeneracion;
 
     private void Awake()
     {
-        EscudoActual =
-            escudoMaximo;
+        EscudoActual = escudoMaximo;
     }
 
     private void Update()
@@ -31,24 +21,17 @@ public class EscudoPlayer : MonoBehaviour
         RegenerarEscudo();
     }
 
-    public float RecibirDanioEscudo(
-        float cantidad)
+    // Aplica daño al escudo y devuelve el daño sobrante que debe ir a la vida.
+    public float RecibirDanioEscudo(float cantidad)
     {
         timerRegeneracion = 0f;
-
-        EscudoActual -=
-            cantidad;
+        EscudoActual -= cantidad;
 
         if (EscudoActual < 0f)
         {
-            float restante =
-                Mathf.Abs(
-                    EscudoActual
-                );
-
+            float sobrante = Mathf.Abs(EscudoActual);
             EscudoActual = 0f;
-
-            return restante;
+            return sobrante;
         }
 
         return 0f;
@@ -56,55 +39,32 @@ public class EscudoPlayer : MonoBehaviour
 
     private void RegenerarEscudo()
     {
-        if (
-            EscudoActual >=
-            escudoMaximo
-        )
-        {
-            return;
-        }
+        if (EscudoActual >= escudoMaximo) return;
 
-        timerRegeneracion +=
-            Time.deltaTime;
+        timerRegeneracion += Time.deltaTime;
+        if (timerRegeneracion < tiempoAntesRegenerar) return;
 
-        if (
-            timerRegeneracion <
-            tiempoAntesRegenerar
-        )
-        {
-            return;
-        }
-
-        EscudoActual +=
-            velocidadRegeneracion *
-            Time.deltaTime;
-
-        EscudoActual =
-            Mathf.Clamp(
-                EscudoActual,
-                0f,
-                escudoMaximo
-            );
+        EscudoActual = Mathf.Clamp(EscudoActual + velocidadRegeneracion * Time.deltaTime, 0f, escudoMaximo);
     }
 
-    public void RecargarEscudo(
-        float cantidad)
+    public void RecargarEscudo(float cantidad)
     {
-        EscudoActual +=
-            cantidad;
-
-        EscudoActual =
-            Mathf.Clamp(
-                EscudoActual,
-                0f,
-                escudoMaximo
-            );
+        EscudoActual = Mathf.Clamp(EscudoActual + cantidad, 0f, escudoMaximo);
     }
 
-    public float ObtenerPorcentajeEscudo()
+    public float EscudoMaximo => escudoMaximo;
+
+    public void SubirEscudoMaximo(float cantidad)
     {
-        return
-            EscudoActual /
-            escudoMaximo;
+        escudoMaximo += cantidad;
+        EscudoActual = Mathf.Clamp(EscudoActual + cantidad, 0f, escudoMaximo);
     }
+
+    // Reduce el tiempo de espera antes de regenerar (mínimo 0.5f)
+    public void MejorarRegeneracion(float reduccion)
+    {
+        tiempoAntesRegenerar = Mathf.Max(0.5f, tiempoAntesRegenerar - reduccion);
+    }
+
+    public float ObtenerPorcentajeEscudo() => EscudoActual / escudoMaximo;
 }

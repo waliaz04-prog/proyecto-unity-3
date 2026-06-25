@@ -4,43 +4,27 @@ using UnityEngine;
 public class UIPuntos : MonoBehaviour
 {
     [Header("UI")]
-    [SerializeField]
-    private TextMeshProUGUI textoPuntos;
+    [SerializeField] private TextMeshProUGUI textoPuntos;
 
     [Header("Formato")]
-    [SerializeField]
-    private string prefijo = "Puntos: ";
+    [SerializeField] private string prefijo = "Puntos: ";
 
     private void Start()
     {
-        if (GameManager.Instance == null)
-            return;
-
-        ActualizarUI(
-            GameManager.Instance.PuntosActuales
-        );
-
-        GameManager.Instance.OnPuntosCambiados +=
-            ActualizarUI;
+        if (GameManager.Instance == null) return;
+        ActualizarUI(GameManager.Instance.PuntosActuales);
+        GameManager.Instance.OnPuntosCambiados += ActualizarUI;
     }
 
     private void OnDestroy()
     {
-        if (GameManager.Instance == null)
-            return;
-
-        GameManager.Instance.OnPuntosCambiados -=
-            ActualizarUI;
+        if (GameManager.Instance == null) return;
+        GameManager.Instance.OnPuntosCambiados -= ActualizarUI;
     }
 
-    private void ActualizarUI(
-        int puntos)
+    private void ActualizarUI(int puntos)
     {
-        if (textoPuntos == null)
-            return;
-
-        textoPuntos.text =
-            prefijo +
-            puntos;
+        if (textoPuntos == null) return;
+        textoPuntos.text = prefijo + puntos;
     }
 }

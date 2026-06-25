@@ -8,23 +8,19 @@ public class MenuSystem : MonoBehaviour
 
     [Header("Panel de Ajustes")]
     [SerializeField] private GameObject panelAjustes;
+
     private bool ajustesActivos = false;
 
     public void Jugar()
     {
         if (!string.IsNullOrEmpty(escenaJugar))
-        {
             SceneManager.LoadScene(escenaJugar);
-        }
         else
-        {
-            Debug.LogWarning("No se ha asignado la escena de juego.");
-        }
+            Debug.LogWarning("MenuSystem: No se ha asignado la escena de juego.");
     }
 
     public void Salir()
     {
-        Debug.Log("Saliendo del juego...");
         Application.Quit();
     }
 
@@ -44,42 +40,31 @@ public class MenuSystem : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    //  Abre el panel de ajustes
     public void AbrirPanelAjustes()
     {
-        if (panelAjustes == null)
-        {
-            Debug.LogWarning("No se ha asignado el Panel de Ajustes en el inspector.");
-            return;
-        }
-
-        panelAjustes.SetActive(true);
+        if (!ValidarPanelAjustes()) return;
         ajustesActivos = true;
+        panelAjustes.SetActive(true);
     }
 
-    //  Cierra el panel de ajustes
     public void CerrarPanelAjustes()
     {
-        if (panelAjustes == null)
-        {
-            Debug.LogWarning("No se ha asignado el Panel de Ajustes en el inspector.");
-            return;
-        }
-
-        panelAjustes.SetActive(false);
+        if (!ValidarPanelAjustes()) return;
         ajustesActivos = false;
+        panelAjustes.SetActive(false);
     }
 
-    //  Alterna (muestra u oculta) el panel de ajustes
     public void TogglePanelAjustes()
     {
-        if (panelAjustes == null)
-        {
-            Debug.LogWarning("No se ha asignado el Panel de Ajustes en el inspector.");
-            return;
-        }
-
+        if (!ValidarPanelAjustes()) return;
         ajustesActivos = !ajustesActivos;
         panelAjustes.SetActive(ajustesActivos);
+    }
+
+    private bool ValidarPanelAjustes()
+    {
+        if (panelAjustes != null) return true;
+        Debug.LogWarning("MenuSystem: No se ha asignado el Panel de Ajustes en el inspector.");
+        return false;
     }
 }

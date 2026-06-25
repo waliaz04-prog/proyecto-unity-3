@@ -5,23 +5,20 @@ using UnityEngine;
 public class Bala : MonoBehaviour
 {
     [Header("Debug")]
-    [SerializeField]
-    private bool mostrarLogs = false;
+    [SerializeField] private bool mostrarLogs = false;
 
     private float danio;
     private float velocidad;
     private float tiempoVida;
-
     private bool atravesarEnemigos;
-
     private float tiempoActual;
+    private bool esDelJugador;
 
     private PoolObject poolObject;
 
     private void Awake()
     {
-        poolObject =
-            GetComponent<PoolObject>();
+        poolObject = GetComponent<PoolObject>();
     }
 
     private void OnEnable()
@@ -29,98 +26,54 @@ public class Bala : MonoBehaviour
         tiempoActual = 0f;
     }
 
-    public void Configurar(
-        float nuevoDanio,
-        float nuevaVelocidad,
-        float nuevoTiempoVida,
-        bool puedeAtravesar)
+    public void Configurar(float nuevoDanio, float nuevaVelocidad, float nuevoTiempoVida, bool puedeAtravesar, bool disparadoPorJugador = true)
     {
-        danio =
-            nuevoDanio;
-
-        velocidad =
-            nuevaVelocidad;
-
-        tiempoVida =
-            nuevoTiempoVida;
-
-        atravesarEnemigos =
-            puedeAtravesar;
-
+        danio = nuevoDanio;
+        velocidad = nuevaVelocidad;
+        tiempoVida = nuevoTiempoVida;
+        atravesarEnemigos = puedeAtravesar;
+        esDelJugador = disparadoPorJugador;
         tiempoActual = 0f;
     }
 
     private void Update()
     {
-        transform.position +=
-            transform.forward *
-            velocidad *
-            Time.deltaTime;
-
-        tiempoActual +=
-            Time.deltaTime;
-
-        if (
-            tiempoActual >=
-            tiempoVida
-        )
-        {
+        transform.position += transform.forward * velocidad * Time.deltaTime;
+        tiempoActual += Time.deltaTime;
+        if (tiempoActual >= tiempoVida)
             DesactivarBala();
-        }
     }
 
-    private void OnTriggerEnter(
-        Collider other)
+    private void OnTriggerEnter(Collider other)
     {
-        if (other.isTrigger)
+        if (other.isTrigger) return;
+
+        // Si la bala es del jugador, ignorar colisión con el jugador (filtro por owner)
+        if (esDelJugador && other.CompareTag("Player"))
             return;
 
-        StatsEnemigo enemigo =
-            other.GetComponentInParent
-            <StatsEnemigo>();
+        // Si es bala enemiga, ignorar colisión con enemigos
+        if (!esDelJugador && !other.CompareTag("Player"))
+        {
+            StatsEnemigo enemigoPropio = other.GetComponentInParent<StatsEnemigo>();
+            if (enemigoPropio != null) return;
+        }
 
+        StatsEnemigo enemigo = other.GetComponentInParent<StatsEnemigo>();
         if (enemigo != null)
         {
-            enemigo.RecibirDanio(
-                danio
-            );
-
-            if (mostrarLogs)
-            {
-                Debug.Log(
-                    "Impacto enemigo"
-                );
-            }
-
-            if (
-                !atravesarEnemigos
-            )
-            {
-                DesactivarBala();
-            }
-
+            enemigo.RecibirDanio(danio);
+            if (mostrarLogs) Debug.Log("Impacto enemigo");
+            if (!atravesarEnemigos) DesactivarBala();
             return;
         }
 
-        VidaPlayer jugador =
-            other.GetComponentInParent
-            <VidaPlayer>();
-
+        VidaPlayer jugador = other.GetComponentInParent<VidaPlayer>();
         if (jugador != null)
         {
-            jugador.RecibirDanio(
-                danio
-            );
-
-            if (mostrarLogs)
-            {
-                Debug.Log(
-                    "Impacto jugador"
-                );
-            }
-
+            jugador.RecibirDanio(danio);
+            if (mostrarLogs) Debug.Log("Impacto jugador");
             DesactivarBala();
-
             return;
         }
 
@@ -130,14 +83,8 @@ public class Bala : MonoBehaviour
     private void DesactivarBala()
     {
         if (poolObject != null)
-        {
-            poolObject
-                .RegresarAlPool();
-        }
+            poolObject.RegresarAlPool();
         else
-        {
-            gameObject
-                .SetActive(false);
-        }
+            gameObject.SetActive(false);
     }
 }

@@ -4,27 +4,14 @@ using UnityEngine.SceneManagement;
 public class VidaPlayer : MonoBehaviour
 {
     [Header("Vida")]
-    [SerializeField]
-    private float vidaMaxima = 100f;
+    [SerializeField] private float vidaMaxima = 100f;
 
     [Header("Game Over")]
-    [SerializeField]
-    private string escenaGameOver = "GameOver";
+    [SerializeField] private string escenaGameOver = "GameOver";
+    [SerializeField] private float tiempoAntesCambiarEscena = 2f;
 
-    [SerializeField]
-    private float tiempoAntesCambiarEscena = 2f;
-
-    public float VidaActual
-    {
-        get;
-        private set;
-    }
-
-    public bool EstaMuerto
-    {
-        get;
-        private set;
-    }
+    public float VidaActual { get; private set; }
+    public bool EstaMuerto { get; private set; }
 
     private PlayerMovimiento movimientoJugador;
     private EscudoPlayer escudoPlayer;
@@ -32,120 +19,59 @@ public class VidaPlayer : MonoBehaviour
     private void Awake()
     {
         VidaActual = vidaMaxima;
-
-        movimientoJugador =
-            GetComponent<PlayerMovimiento>();
-
-        escudoPlayer =
-            GetComponent<EscudoPlayer>();
+        movimientoJugador = GetComponent<PlayerMovimiento>();
+        escudoPlayer = GetComponent<EscudoPlayer>();
     }
 
-    public void RecibirDanio(
-        float cantidad)
+    public void RecibirDanio(float cantidad)
     {
-        if (EstaMuerto)
-            return;
+        if (EstaMuerto) return;
 
-        if (
-            escudoPlayer != null &&
-            escudoPlayer.EscudoActual > 0
-        )
+        if (escudoPlayer != null && escudoPlayer.EscudoActual > 0)
         {
-            cantidad =
-                escudoPlayer
-                .RecibirDanioEscudo(
-                    cantidad
-                );
-
-            if (cantidad <= 0)
-                return;
+            cantidad = escudoPlayer.RecibirDanioEscudo(cantidad);
+            if (cantidad <= 0) return;
         }
 
-        VidaActual -=
-            cantidad;
-
-        VidaActual =
-            Mathf.Clamp(
-                VidaActual,
-                0,
-                vidaMaxima
-            );
-
-        Debug.Log(
-            "Vida actual: "
-            + VidaActual
-        );
+        VidaActual = Mathf.Clamp(VidaActual - cantidad, 0, vidaMaxima);
 
         if (VidaActual <= 0)
-        {
             Morir();
-        }
     }
 
-    public void CurarVida(
-        float cantidad)
+    public void CurarVida(float cantidad)
     {
-        if (EstaMuerto)
-            return;
+        if (EstaMuerto) return;
+        VidaActual = Mathf.Clamp(VidaActual + cantidad, 0, vidaMaxima);
+    }
 
-        VidaActual +=
-            cantidad;
+    public float VidaMaxima => vidaMaxima;
 
-        VidaActual =
-            Mathf.Clamp(
-                VidaActual,
-                0,
-                vidaMaxima
-            );
+    public void SubirVidaMaxima(float cantidad)
+    {
+        vidaMaxima += cantidad;
+        // Al subir el máximo, también curar la diferencia
+        VidaActual = Mathf.Clamp(VidaActual + cantidad, 0f, vidaMaxima);
     }
 
     private void Morir()
     {
-        if (EstaMuerto)
-            return;
-
+        if (EstaMuerto) return;
         EstaMuerto = true;
 
-        Debug.Log(
-            "Jugador muri�"
-        );
+        if (movimientoJugador != null)
+            movimientoJugador.Morir();
 
-        if (
-            movimientoJugador !=
-            null
-        )
-        {
-            movimientoJugador
-                .Morir();
-        }
-
-        Invoke(
-            nameof(
-                IrAGameOver
-            ),
-            tiempoAntesCambiarEscena
-        );
+        Invoke(nameof(IrAGameOver), tiempoAntesCambiarEscena);
     }
 
     private void IrAGameOver()
     {
-        Cursor.lockState =
-            CursorLockMode.None;
-
-        Cursor.visible =
-            true;
-
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         Time.timeScale = 1f;
-
-        SceneManager.LoadScene(
-            escenaGameOver
-        );
+        SceneManager.LoadScene(escenaGameOver);
     }
 
-    public float ObtenerPorcentajeVida()
-    {
-        return
-            VidaActual /
-            vidaMaxima;
-    }
+    public float ObtenerPorcentajeVida() => VidaActual / vidaMaxima;
 }

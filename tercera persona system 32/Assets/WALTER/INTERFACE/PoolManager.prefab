@@ -47,10 +47,18 @@ MonoBehaviour:
   pools:
   - id: alien
     prefab: {fileID: 8272684473738788310, guid: 4c25502222748ad4ebd47329b631edf5, type: 3}
-    cantidadInicial: 0
+    cantidadInicial: 20
   - id: 'nave '
-    prefab: {fileID: 7771242586143431321, guid: e8b9b664f649c3646b6b5bb7cd712d4c, type: 3}
-    cantidadInicial: 0
-  - id: valas
+    prefab: {fileID: 2807412952401077226, guid: fb76c80037b04b348883d6207f4c9600, type: 3}
+    cantidadInicial: 5
+  - id: Bala
     prefab: {fileID: 6514964250100746237, guid: 4cb60fe6255642142982c1b39f1d58fc, type: 3}
+    cantidadInicial: 50
+  - id: 
+    prefab: {fileID: 0}
     cantidadInicial: 0
+  - id: 
+    prefab: {fileID: 0}
+    cantidadInicial: 0
+  permitirExpansionAutomatica: 0
+  mostrarLogs: 1
