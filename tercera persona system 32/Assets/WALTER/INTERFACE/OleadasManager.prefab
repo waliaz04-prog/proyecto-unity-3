@@ -44,12 +44,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c17e1fbe2d41b0b4ea95a222e8c7eb3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemigosPrefabs:
-  - {fileID: 0}
-  puntosSpawn: []
-  enemigosIniciales: 5
+  jugador: {fileID: 5992309312074546384, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
+  areasSpawn: []
+  enemigosDisponibles: []
+  enemigosPrimeraOleada: 10
   incrementoPorOleada: 3
+  esperaPrimeraOleada: 10
   tiempoEntreOleadas: 10
-  oleadaActual: 0
+  tiempoEntreSpawns: 0.15
+  distanciaMinimaJugador: 20
+  radioBusquedaNavMesh: 10
+  intentosBusqueda: 30
+  distanciaMinimaEntreEnemigos: 2
   maximoEnemigosSimultaneos: 100
   mostrarLogs: 1
