@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 274bfb2ab5377c940b9d9a5467093d79, type: 3}
   m_Name: MejoraPermanente
   m_EditorClassIdentifier: 
-  nombreItem: "\xCDtem"
-  descripcion: 
+  nombreItem: VIDA
+  descripcion: Aumenta tu vida maxima
   icono: {fileID: 0}
   tipo: 0
   precioBase: 300

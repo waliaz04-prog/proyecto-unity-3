@@ -12,12 +12,14 @@ GameObject:
   - component: {fileID: 5597425388111629271}
   - component: {fileID: 3888843673994795571}
   - component: {fileID: 6908073629494041623}
-  - component: {fileID: 1299869807020497430}
-  - component: {fileID: 5976638632582242185}
-  - component: {fileID: 1819689454415052337}
-  - component: {fileID: 3678959818425616137}
-  - component: {fileID: 2252289510887053263}
-  - component: {fileID: 4782365662114344694}
+  - component: {fileID: 3795440281459783296}
+  - component: {fileID: 2654341228533779433}
+  - component: {fileID: -1031424296532291187}
+  - component: {fileID: 7253644803635012762}
+  - component: {fileID: -2879301180882319548}
+  - component: {fileID: 5922931823553741225}
+  - component: {fileID: 3743825095590944295}
+  - component: {fileID: 1494210321607427358}
   m_Layer: 0
   m_Name: nave alien
   m_TagString: Untagged
@@ -101,7 +103,7 @@ NavMeshAgent:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2807412952401077226}
   m_Enabled: 1
-  m_AgentTypeID: 0
+  m_AgentTypeID: -1372625422
   m_Radius: 4.000001
   m_Speed: 3.5
   m_Acceleration: 8
@@ -115,45 +117,55 @@ NavMeshAgent:
   m_BaseOffset: 1.993832
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &1299869807020497430
-MonoBehaviour:
+--- !u!65 &3795440281459783296
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2807412952401077226}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dba0fd7b184de9246bc2f6de8964169c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  jugador: {fileID: 5992309312074546384, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
---- !u!114 &5976638632582242185
-MonoBehaviour:
+  serializedVersion: 3
+  m_Size: {x: 8.000001, y: 1.3904796, z: 7.486858}
+  m_Center: {x: 0.00000047683716, y: 0.2985922, z: -0.25657296}
+--- !u!54 &2654341228533779433
+Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2807412952401077226}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 517ffce5ca9e12b4089106806853fe2d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  vidaBase: 100
-  danioBase: 10
-  velocidadAtaqueBase: 1
-  velocidadMovimientoBase: 4
-  aceleracionBase: 8
-  resistenciaBase: 0
-  puntosBase: 10
-  aumentoVida: 0.15
-  aumentoDanio: 0.1
-  aumentoAtaque: 0.05
-  aumentoAceleracion: 0.05
-  aumentoResistencia: 0.03
-  mostrarLogs: 0
---- !u!114 &1819689454415052337
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &-1031424296532291187
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -170,20 +182,20 @@ MonoBehaviour:
   velocidadRotacion: 5
   distanciaDeteccion: 40
   distanciaAtaque: 20
-  distanciaNuevoDestino: 5
-  tiempoMaximoDestino: 5
+  distanciaNuevoDestino: 10
+  tiempoMaximoDestino: 10
   modeloVisual: {fileID: 201405156693886805}
-  alturaVisual: 10
+  alturaVisual: 11
   idPoolAlien: alien
-  puntoSpawn: {fileID: 201405156693886805}
+  puntoSpawn: {fileID: 1033263451334692632, guid: e8b9b664f649c3646b6b5bb7cd712d4c, type: 3}
   tiempoAntesGenerar: 10
   tiempoEntreSpawns: 5
   maximoAliensPorNave: 10
   maximoAliensGlobales: 100
   radioBusquedaNavMesh: 10
   mostrarLogs: 0
-  mostrarGizmos: 1
---- !u!114 &3678959818425616137
+  mostrarGizmos: 0
+--- !u!114 &7253644803635012762
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -192,10 +204,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 2807412952401077226}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 000dff2e92f08c643b7ae944adaf25f4, type: 3}
+  m_Script: {fileID: 11500000, guid: 517ffce5ca9e12b4089106806853fe2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &2252289510887053263
+  vidaBase: 15
+  danioBase: 10
+  velocidadAtaqueBase: 1
+  velocidadMovimientoBase: 4
+  aceleracionBase: 8
+  resistenciaBase: 0
+  puntosBase: 10
+  aumentoVida: 5
+  aumentoDanio: 2
+  aumentoAtaque: 0.5
+  aumentoAceleracion: 0.05
+  aumentoResistencia: 0.5
+  mostrarLogs: 0
+--- !u!114 &-2879301180882319548
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -209,7 +234,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tipoEnemigo: 1
   mostrarLogs: 0
---- !u!114 &4782365662114344694
+--- !u!114 &5922931823553741225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2807412952401077226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 000dff2e92f08c643b7ae944adaf25f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3743825095590944295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2807412952401077226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dba0fd7b184de9246bc2f6de8964169c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  jugador: {fileID: 5992309312074546384, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
+--- !u!114 &1494210321607427358
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -224,6 +274,6 @@ MonoBehaviour:
   modoAtaque: 1
   danio: 10
   tiempoEntreAtaques: 2
-  distanciaAtaque: 5
-  objetivo: {fileID: 8285378311536101105, guid: 04e2739e9a7f76446b6b3a61a2228933, type: 3}
+  distanciaAtaque: 2.5
+  objetivo: {fileID: 5992309312074546384, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
   mostrarLogs: 0

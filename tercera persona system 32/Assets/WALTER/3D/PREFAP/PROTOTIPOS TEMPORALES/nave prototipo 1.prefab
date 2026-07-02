@@ -146,7 +146,7 @@ Transform:
   m_GameObject: {fileID: 7771242586143431321}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.29, y: 9.77, z: 45.41}
+  m_LocalPosition: {x: 1.29, y: 11, z: 45.41}
   m_LocalScale: {x: 4.4328103, y: 0.16823845, z: 4.4328103}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -293,8 +293,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   jugador: {fileID: 5992309312074546384, guid: 76dabbdd2c1729342a3193d9321e8743, type: 3}
   zonaVuelo: {fileID: 4106291306479635218, guid: c54d7054660c3cf44a889e384a919b05, type: 3}
-  velocidadMovimiento: 8
-  aceleracion: 20
   velocidadRotacion: 5
   distanciaDeteccion: 40
   distanciaAtaque: 20
