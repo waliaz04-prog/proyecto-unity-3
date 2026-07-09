@@ -25,7 +25,7 @@ public class ItemConsumible : ItemMaquina
     }
 
     public override string ObtenerTextoAccion(int nivelActual) =>
-        $"[E] {nombreItem}  —  {precio} pts";
+        $"E  {nombreItem}  —  {precio} pts";
 
     public override bool EsConsumible() => true;
 }

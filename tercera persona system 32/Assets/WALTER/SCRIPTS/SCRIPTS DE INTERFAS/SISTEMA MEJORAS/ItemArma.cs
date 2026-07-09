@@ -29,7 +29,7 @@ public class ItemArma : ItemMaquina
     public override string ObtenerTextoAccion(int nivelActual)
     {
         if (nivelActual == 0)
-            return $"[E] Comprar {nombreItem}  —  {precioDesbloqueo} pts";
-        return $"[E] Mejorar {nombreItem}  Lv{nivelActual}  —  {ObtenerPrecio(nivelActual)} pts";
+            return $"E  Comprar {nombreItem}  —  {precioDesbloqueo} pts";
+        return $"E  Mejorar {nombreItem}  Lv{nivelActual}  —  {ObtenerPrecio(nivelActual)} pts";
     }
 }

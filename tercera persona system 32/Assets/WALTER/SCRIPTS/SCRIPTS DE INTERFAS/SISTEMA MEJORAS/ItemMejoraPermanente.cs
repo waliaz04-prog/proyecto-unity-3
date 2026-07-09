@@ -18,5 +18,5 @@ public class ItemMejoraPermanente : ItemMaquina
         handler.AplicarMejora(tipo, valorPorNivel);
 
     public override string ObtenerTextoAccion(int nivelActual) =>
-        $"[E] {nombreItem}  Lv{nivelActual + 1}  —  {ObtenerPrecio(nivelActual)} pts";
+        $"E  {nombreItem}  Lv{nivelActual + 1}  —  {ObtenerPrecio(nivelActual)} pts";
 }
