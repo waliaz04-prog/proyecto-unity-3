@@ -319,12 +319,15 @@ MonoBehaviour:
   efectoDisparo: {fileID: 0}
   balasPorDisparo: 1
   dispersion: 0
-  usarMunicion: 0
-  municionActual: 30
-  municionMaxima: 30
   velocidadBala: 60
   tiempoVidaBala: 5
   atravesarEnemigos: 0
+  usarMunicion: 0
+  tipoMunicion: 0
+  municionEnCargador: 30
+  tamanoCargador: 30
+  municionReserva: 90
+  reservaMaxima: 300
   tiempoRecarga: 1.5
   idPoolBala: Bala
   mostrarLogs: 0
@@ -712,12 +715,15 @@ MonoBehaviour:
   efectoDisparo: {fileID: 0}
   balasPorDisparo: 1
   dispersion: 0
-  usarMunicion: 1
-  municionActual: 30
-  municionMaxima: 30
   velocidadBala: 60
   tiempoVidaBala: 5
   atravesarEnemigos: 0
+  usarMunicion: 1
+  tipoMunicion: 0
+  municionEnCargador: 30
+  tamanoCargador: 30
+  municionReserva: 90
+  reservaMaxima: 300
   tiempoRecarga: 1.5
   idPoolBala: bala
   mostrarLogs: 0
@@ -926,7 +932,7 @@ GameObject:
   - component: {fileID: 3139541920285231602}
   - component: {fileID: 829571989011376856}
   m_Layer: 3
-  m_Name: Player
+  m_Name: player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -947,8 +953,8 @@ Transform:
   m_Children:
   - {fileID: 5334151252166088420}
   - {fileID: 5498831198107903692}
-  - {fileID: 642764810291661600}
   - {fileID: 1378760982327463765}
+  - {fileID: 642764810291661600}
   - {fileID: 2438894585606785426}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

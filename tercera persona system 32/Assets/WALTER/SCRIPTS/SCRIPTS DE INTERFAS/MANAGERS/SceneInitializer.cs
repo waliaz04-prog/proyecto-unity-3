@@ -7,11 +7,19 @@ public class SceneInitializer : MonoBehaviour
     [SerializeField] private bool resetearTimeScale = true;
     [SerializeField] private bool bloquearCursor = true;
 
+    [Tooltip("Reinicia puntos, bajas y tiempo del GameManager al cargar esta escena. Activar en la escena de juego.")]
+    [SerializeField] private bool reiniciarEstadisticas = true;
+
     private void Awake()
     {
         EnemyBase.LimpiarCacheJugador();
         EnemigoNave.ResetearContadorGlobal();
         SceneManager.sceneLoaded += OnSceneCargada;
+
+        // El GameManager sobrevive entre escenas (DontDestroyOnLoad);
+        // sin este reset, los puntos de la partida anterior persisten al reintentar.
+        if (reiniciarEstadisticas && GameManager.Instance != null)
+            GameManager.Instance.ReiniciarPartida();
     }
 
     private void Start()

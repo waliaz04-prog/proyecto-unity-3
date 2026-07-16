@@ -26,7 +26,11 @@ public class HUDManager : MonoBehaviour
     private float escudoObjetivo;
     private float estaminaObjetivo;
 
-    private int municionCacheada = -1;
+    // Caches para actualizar los textos solo cuando algo cambia
+    // (evita generar strings nuevos cada frame = menos Garbage Collection).
+    private int municionCacheada = int.MinValue;
+    private int reservaCacheada = int.MinValue;
+    private bool recargandoCacheado;
     private int oleadaCacheada = -1;
 
     private void Start()
@@ -47,6 +51,7 @@ public class HUDManager : MonoBehaviour
     {
         ActualizarBarras();
         ActualizarTextosDinamicos();
+        ActualizarMunicion();
     }
 
     private void ActualizarBarras()
@@ -76,20 +81,63 @@ public class HUDManager : MonoBehaviour
     {
         if (GameManager.Instance == null) return;
 
-        // Oleada: actualizar solo cuando cambia
+        // Oleada y multiplicador: actualizar solo cuando cambia la oleada
+        // (el multiplicador depende de la oleada, así no generamos strings cada frame).
         int oleada = GameManager.Instance.OleadaActual;
         if (oleada != oleadaCacheada)
         {
             oleadaCacheada = oleada;
             if (textoOleada != null)
                 textoOleada.text = "Oleada: " + oleada;
+
+            if (textoMultiplicador != null)
+            {
+                float mult = GameManager.Instance.ObtenerMultiplicadorPuntos();
+                textoMultiplicador.text = "x" + mult.ToString("F1");
+            }
+        }
+    }
+
+    // Muestra "cargador / reserva" del arma equipada, o "Recargando..." durante la recarga.
+    // Solo reconstruye el string cuando algún valor cambia.
+    private void ActualizarMunicion()
+    {
+        if (textoMunicion == null || weaponSwitcher == null) return;
+
+        WeaponSystem arma = weaponSwitcher.ObtenerSistemaActual();
+
+        // Arma melee o sin munición: ocultar el texto.
+        if (arma == null || !arma.UsaMunicion)
+        {
+            if (municionCacheada != -1)
+            {
+                municionCacheada = -1;
+                reservaCacheada = -1;
+                textoMunicion.text = string.Empty;
+            }
+            return;
         }
 
-        // Multiplicador: se actualiza junto con la oleada
-        if (textoMultiplicador != null)
+        if (arma.EstaRecargando)
         {
-            float mult = GameManager.Instance.ObtenerMultiplicadorPuntos();
-            textoMultiplicador.text = "x" + mult.ToString("F1");
+            if (!recargandoCacheado)
+            {
+                recargandoCacheado = true;
+                municionCacheada = int.MinValue;
+                textoMunicion.text = "Recargando...";
+            }
+            return;
+        }
+        recargandoCacheado = false;
+
+        int cargador = arma.ObtenerMunicionCargador();
+        int reserva = arma.ObtenerMunicionReserva();
+
+        if (cargador != municionCacheada || reserva != reservaCacheada)
+        {
+            municionCacheada = cargador;
+            reservaCacheada = reserva;
+            textoMunicion.text = cargador + " / " + reserva;
         }
     }
 

@@ -89,4 +89,20 @@ public class GameManager : MonoBehaviour
     {
         return 1f + (oleadaActual - 1) * multiplicadorPuntosPorOleada;
     }
+
+    // Reinicia las estadísticas de la partida. Llamar al iniciar/reiniciar la escena de juego.
+    // oleadaMaxima NO se resetea: es el récord histórico entre partidas.
+    public void ReiniciarPartida()
+    {
+        puntosActuales = 0;
+        puntosGanados = 0;
+        puntosGastados = 0;
+        aliensEliminados = 0;
+        navesEliminadas = 0;
+        enemigosTotalesEliminados = 0;
+        tiempoSobrevivido = 0f;
+        oleadaActual = 1;
+        OnPuntosCambiados?.Invoke(puntosActuales);
+        if (mostrarLogs) Debug.Log("GameManager: partida reiniciada");
+    }
 }

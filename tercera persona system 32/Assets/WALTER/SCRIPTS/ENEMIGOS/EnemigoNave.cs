@@ -189,14 +189,15 @@ public class EnemigoNave : EnemyBase
         ControladorEnemigo controlador = alien.GetComponent<ControladorEnemigo>();
         if (controlador != null)
         {
-            controlador.OnEnemyDeath -= ReducirContador;
+            // ControladorEnemigo limpia sus suscripciones en OnDisable,
+            // así que no quedan suscripciones fantasma al reusar del pool.
             controlador.OnEnemyDeath += ReducirContador;
         }
 
         if (mostrarLogs) Debug.Log("Alien generado por nave");
     }
 
-    private void ReducirContador()
+    private void ReducirContador(ControladorEnemigo controlador)
     {
         aliensActivosGlobal--;
         if (aliensActivosGlobal < 0) aliensActivosGlobal = 0;

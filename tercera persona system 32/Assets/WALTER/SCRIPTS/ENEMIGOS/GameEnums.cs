@@ -20,8 +20,17 @@ public enum TipoAudio
 
 public enum TipoConsumible
 {
-    CuracionInstantanea,
-    PaqueteMunicion
+    CuracionInstantanea
+}
+
+// Tipos de munición del juego. Cada arma de fuego usa uno,
+// y los ítems de munición de las máquinas venden por tipo.
+public enum TipoMunicion
+{
+    Pistola,
+    Metralleta,
+    Escopeta,
+    Rifle
 }
 
 public enum TipoMejora
@@ -32,5 +41,6 @@ public enum TipoMejora
     VelocidadMovimiento,
     CadenciaDisparo,
     CapacidadMunicion,
-    VelocidadRecarga
+    VelocidadRecarga,
+    Danio
 }

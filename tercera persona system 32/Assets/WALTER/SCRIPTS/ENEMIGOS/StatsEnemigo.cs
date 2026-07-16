@@ -34,6 +34,7 @@ public class StatsEnemigo : MonoBehaviour
     [SerializeField] private bool mostrarLogs = false;
 
     private float vidaActual;
+    private float vidaMaximaActual;
     private float danioActual;
     private float velocidadAtaqueActual;
     private float velocidadMovimientoActual;
@@ -45,7 +46,7 @@ public class StatsEnemigo : MonoBehaviour
     private AtaqueEnemigo ataqueEnemigo;
 
     public float VidaActual => vidaActual;
-    public float VidaMaxima => vidaBase;
+    public float VidaMaxima => vidaMaximaActual;
     public float Danio => danioActual;
 
     private void Awake()
@@ -64,6 +65,7 @@ public class StatsEnemigo : MonoBehaviour
     private void AplicarStatsBase()
     {
         vidaActual = vidaBase;
+        vidaMaximaActual = vidaBase;
         danioActual = danioBase;
         velocidadAtaqueActual = velocidadAtaqueBase;
         velocidadMovimientoActual = velocidadMovimientoBase;
@@ -74,7 +76,10 @@ public class StatsEnemigo : MonoBehaviour
 
     public void ConfigurarPorOleada(int oleada)
     {
-        vidaActual = vidaBase * (1f + aumentoVida * oleada);
+        // La vida máxima escala junto con la actual: así el porcentaje
+        // de vida (barras de UI) siempre queda entre 0 y 1.
+        vidaMaximaActual = vidaBase * (1f + aumentoVida * oleada);
+        vidaActual = vidaMaximaActual;
         danioActual = danioBase * (1f + aumentoDanio * oleada);
         velocidadAtaqueActual = velocidadAtaqueBase * (1f + aumentoAtaque * oleada);
         aceleracionActual = aceleracionBase * (1f + aumentoAceleracion * oleada);
@@ -113,5 +118,5 @@ public class StatsEnemigo : MonoBehaviour
 
     public int ObtenerPuntos() => puntosBase;
 
-    public float ObtenerPorcentajeVida() => vidaActual / vidaBase;
+    public float ObtenerPorcentajeVida() => vidaActual / vidaMaximaActual;
 }

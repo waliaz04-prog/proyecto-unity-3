@@ -13,9 +13,13 @@ public class WeaponSwitcher : MonoBehaviour
     private int armaActual;
     private bool[] bloqueadas;
 
+    // Cache de los WeaponSystem de cada arma para no hacer GetComponent en runtime.
+    private WeaponSystem[] sistemas;
+
     private void Start()
     {
         InicializarBloqueos();
+        CachearSistemas();
         armaActual = armaInicial;
         // Si el arma inicial está bloqueada, buscar la primera disponible
         if (EstasBloqueada(armaActual))
@@ -79,6 +83,24 @@ public class WeaponSwitcher : MonoBehaviour
             if (armas[i] != null)
                 armas[i].SetActive(i == armaActual && !EstasBloqueada(i));
         }
+    }
+
+    private void CachearSistemas()
+    {
+        sistemas = new WeaponSystem[armas.Length];
+        for (int i = 0; i < armas.Length; i++)
+        {
+            if (armas[i] != null)
+                sistemas[i] = armas[i].GetComponent<WeaponSystem>();
+        }
+    }
+
+    // WeaponSystem del arma equipada (null si el arma no tiene uno).
+    public WeaponSystem ObtenerSistemaActual()
+    {
+        if (sistemas == null || armaActual < 0 || armaActual >= sistemas.Length)
+            return null;
+        return sistemas[armaActual];
     }
 
     public GameObject ObtenerArmaActual() => armas[armaActual];

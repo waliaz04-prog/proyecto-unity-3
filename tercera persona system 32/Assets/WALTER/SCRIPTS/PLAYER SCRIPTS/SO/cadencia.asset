@@ -9,14 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec33b6386091a784a90ea82b5a0ed57f, type: 3}
-  m_Name: pistola
+  m_Script: {fileID: 11500000, guid: 274bfb2ab5377c940b9d9a5467093d79, type: 3}
+  m_Name: cadencia
   m_EditorClassIdentifier: 
-  nombreItem: pistola chida
-  descripcion: "Es una pistola peque\xF1a y estandar "
+  nombreItem: "\xCDtem"
+  descripcion: 
   icono: {fileID: 0}
+  tipo: 4
+  precioBase: 300
+  multiplicadorPrecio: 1.5
+  valorPorNivel: 10
+  mejorarSoloUnArma: 1
   indiceArma: 1
-  precioDesbloqueo: 100
-  precioMejoraBase: 500
-  multiplicadorMejora: 1.3
-  mejoraDanoPorNivel: 10

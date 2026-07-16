@@ -20,4 +20,9 @@ public abstract class ItemMaquina : ScriptableObject
 
     // Los consumibles no acumulan nivel — siempre cuestan lo mismo.
     public virtual bool EsConsumible() => false;
+
+    // Retorna true si la compra es válida ahora mismo.
+    // Ej: munición y mejoras de un arma solo si esa arma está desbloqueada.
+    // La máquina lo verifica ANTES de cobrar, así no se desperdician puntos.
+    public virtual bool PuedeComprar(PlayerUpgradeHandler handler, int nivelActual) => true;
 }

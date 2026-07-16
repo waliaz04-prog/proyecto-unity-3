@@ -1,9 +1,15 @@
 using UnityEngine;
 
+// Bala con detección por raycast: lanza un rayo entre la posición actual y la
+// siguiente en cada frame, así nunca atraviesa colliders sin detectarlos
+// (evita el "tunneling" que ocurre con triggers a alta velocidad).
 [RequireComponent(typeof(PoolObject))]
-[RequireComponent(typeof(Collider))]
 public class Bala : MonoBehaviour
 {
+    [Header("Colisión")]
+    [Tooltip("Capas con las que la bala puede impactar. Excluye aquí capas como efectos o pickups.")]
+    [SerializeField] private LayerMask capasImpacto = ~0;
+
     [Header("Debug")]
     [SerializeField] private bool mostrarLogs = false;
 
@@ -13,6 +19,10 @@ public class Bala : MonoBehaviour
     private bool atravesarEnemigos;
     private float tiempoActual;
     private bool esDelJugador;
+
+    // Evita dañar dos veces al mismo enemigo cuando la bala lo atraviesa
+    // y ese enemigo tiene varios colliders.
+    private StatsEnemigo ultimoEnemigoDanado;
 
     private PoolObject poolObject;
 
@@ -24,6 +34,7 @@ public class Bala : MonoBehaviour
     private void OnEnable()
     {
         tiempoActual = 0f;
+        ultimoEnemigoDanado = null;
     }
 
     public void Configurar(float nuevoDanio, float nuevaVelocidad, float nuevoTiempoVida, bool puedeAtravesar, bool disparadoPorJugador = true)
@@ -34,50 +45,71 @@ public class Bala : MonoBehaviour
         atravesarEnemigos = puedeAtravesar;
         esDelJugador = disparadoPorJugador;
         tiempoActual = 0f;
+        ultimoEnemigoDanado = null;
     }
 
     private void Update()
     {
-        transform.position += transform.forward * velocidad * Time.deltaTime;
+        float distanciaFrame = velocidad * Time.deltaTime;
+        Vector3 origen = transform.position;
+
+        // Rayo que cubre exactamente el trayecto de este frame.
+        if (Physics.Raycast(origen, transform.forward, out RaycastHit impacto, distanciaFrame, capasImpacto, QueryTriggerInteraction.Ignore))
+        {
+            bool balaTermino = ProcesarImpacto(impacto);
+            if (balaTermino) return;
+        }
+
+        transform.position = origen + transform.forward * distanciaFrame;
+
         tiempoActual += Time.deltaTime;
         if (tiempoActual >= tiempoVida)
             DesactivarBala();
     }
 
-    private void OnTriggerEnter(Collider other)
+    // Retorna true si la bala terminó su recorrido (volvió al pool).
+    private bool ProcesarImpacto(RaycastHit impacto)
     {
-        if (other.isTrigger) return;
+        Collider col = impacto.collider;
 
-        // Si la bala es del jugador, ignorar colisión con el jugador (filtro por owner)
-        if (esDelJugador && other.CompareTag("Player"))
-            return;
+        // La bala del jugador nunca daña al jugador.
+        if (esDelJugador && col.CompareTag("Player"))
+            return false;
 
-        // Si es bala enemiga, ignorar colisión con enemigos
-        if (!esDelJugador && !other.CompareTag("Player"))
-        {
-            StatsEnemigo enemigoPropio = other.GetComponentInParent<StatsEnemigo>();
-            if (enemigoPropio != null) return;
-        }
-
-        StatsEnemigo enemigo = other.GetComponentInParent<StatsEnemigo>();
+        StatsEnemigo enemigo = col.GetComponentInParent<StatsEnemigo>();
         if (enemigo != null)
         {
-            enemigo.RecibirDanio(danio);
-            if (mostrarLogs) Debug.Log("Impacto enemigo");
-            if (!atravesarEnemigos) DesactivarBala();
-            return;
+            // Las balas enemigas atraviesan a otros enemigos sin dañarlos.
+            if (!esDelJugador) return false;
+
+            if (enemigo != ultimoEnemigoDanado)
+            {
+                enemigo.RecibirDanio(danio);
+                ultimoEnemigoDanado = enemigo;
+                if (mostrarLogs) Debug.Log("Impacto enemigo");
+            }
+
+            if (atravesarEnemigos) return false;
+
+            DesactivarBala();
+            return true;
         }
 
-        VidaPlayer jugador = other.GetComponentInParent<VidaPlayer>();
+        VidaPlayer jugador = col.GetComponentInParent<VidaPlayer>();
         if (jugador != null)
         {
-            jugador.RecibirDanio(danio);
-            if (mostrarLogs) Debug.Log("Impacto jugador");
+            if (!esDelJugador)
+            {
+                jugador.RecibirDanio(danio);
+                if (mostrarLogs) Debug.Log("Impacto jugador");
+            }
             DesactivarBala();
-            return;
+            return true;
         }
 
+        // Pared, suelo u otro obstáculo del escenario.
         DesactivarBala();
+        return true;
     }
 
     private void DesactivarBala()

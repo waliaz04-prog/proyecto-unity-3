@@ -4,7 +4,9 @@ using UnityEngine;
 [RequireComponent(typeof(PoolObject))]
 public class ControladorEnemigo : MonoBehaviour
 {
-    public Action OnEnemyDeath;
+    // El evento entrega el propio controlador para que el suscriptor
+    // sepa exactamente qué enemigo murió (sin buscar en listas).
+    public event Action<ControladorEnemigo> OnEnemyDeath;
 
     [Header("Tipo")]
     [SerializeField] private TipoEnemigo tipoEnemigo = TipoEnemigo.Alien;
@@ -29,12 +31,20 @@ public class ControladorEnemigo : MonoBehaviour
         muerto = false;
     }
 
+    private void OnDisable()
+    {
+        // Al volver al pool se limpian todas las suscripciones.
+        // Evita que sistemas viejos (ej. una nave que lo generó) sigan
+        // recibiendo eventos cuando el enemigo es reutilizado por otro sistema.
+        OnEnemyDeath = null;
+    }
+
     public void Morir()
     {
         if (muerto) return;
         muerto = true;
         RegistrarMuerte();
-        OnEnemyDeath?.Invoke();
+        OnEnemyDeath?.Invoke(this);
         if (mostrarLogs) Debug.Log(gameObject.name + " eliminado");
         RegresarPool();
     }

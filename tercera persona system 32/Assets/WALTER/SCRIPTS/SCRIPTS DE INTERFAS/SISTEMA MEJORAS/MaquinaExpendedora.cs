@@ -66,6 +66,14 @@ public class MaquinaExpendedora : MonoBehaviour
         int nivelActual = UpgradeManager.Instance.ObtenerNivel(item);
         int precio = item.ObtenerPrecio(nivelActual);
 
+        // Compra inválida (ej. munición de un arma que aún no se desbloqueó):
+        // se rechaza antes de cobrar.
+        if (!item.PuedeComprar(upgradeHandler, nivelActual))
+        {
+            ReproducirSonido(sonidoSinPuntos);
+            return;
+        }
+
         if (!GameManager.Instance.GastarPuntos(precio))
         {
             ReproducirSonido(sonidoSinPuntos);

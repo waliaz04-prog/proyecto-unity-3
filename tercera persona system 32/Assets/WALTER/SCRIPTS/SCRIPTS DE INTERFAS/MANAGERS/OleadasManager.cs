@@ -50,7 +50,7 @@ public class OleadasManager : MonoBehaviour
 
     private readonly List<GameObject> enemigosVivos = new List<GameObject>();
 
-    // Bug fix: el diccionario ahora se decrementa correctamente en ActualizarListaEnemigos
+    // Conteo de enemigos activos por tipo (idPool). Se decrementa en CuandoMuereEnemigo.
     private readonly Dictionary<string, int> enemigosActivos = new Dictionary<string, int>();
 
     // Mapeo enemigo -> idPool para decrementar el conteo correcto al morir
@@ -128,40 +128,45 @@ public class OleadasManager : MonoBehaviour
 
         if (enemigo.TryGetComponent(out ControladorEnemigo controlador))
         {
-            controlador.OnEnemyDeath -= ActualizarListaEnemigos;
-            controlador.OnEnemyDeath += ActualizarListaEnemigos;
+            // ControladorEnemigo limpia sus suscripciones en OnDisable,
+            // así que basta con suscribirse una vez por spawn.
+            controlador.OnEnemyDeath += CuandoMuereEnemigo;
         }
     }
 
-    private void ActualizarListaEnemigos()
+    // El evento entrega el enemigo exacto que murió: se elimina y decrementa
+    // directamente, sin escanear la lista buscando inactivos.
+    private void CuandoMuereEnemigo(ControladorEnemigo controlador)
     {
-        // Decrementar conteo de enemigos activos por tipo para el enemigo que acaba de morir.
-        // Se identifica el muerto como el que ya no está activo en la jerarquía.
+        if (controlador == null) return;
+        GameObject enemigo = controlador.gameObject;
+        enemigosVivos.Remove(enemigo);
+        QuitarDeRegistro(enemigo);
+    }
+
+    // Decrementa el conteo por tipo y limpia el mapeo. Siempre usar este método
+    // al sacar un enemigo del sistema para que los contadores no se corrompan.
+    private void QuitarDeRegistro(GameObject enemigo)
+    {
+        if (enemigo == null || !enemigoAIdPool.TryGetValue(enemigo, out string id)) return;
+
+        enemigoAIdPool.Remove(enemigo);
+        if (enemigosActivos.TryGetValue(id, out int activos))
+            enemigosActivos[id] = Mathf.Max(0, activos - 1);
+    }
+
+    // Red de seguridad: quita enemigos destruidos o desactivados por fuera
+    // del flujo normal de muerte (ej. cambio de escena).
+    private void LimpiarLista()
+    {
         for (int i = enemigosVivos.Count - 1; i >= 0; i--)
         {
             GameObject e = enemigosVivos[i];
             if (e == null || !e.activeInHierarchy)
             {
-                if (e != null && enemigoAIdPool.TryGetValue(e, out string id))
-                {
-                    if (enemigosActivos.ContainsKey(id))
-                    {
-                        enemigosActivos[id]--;
-                        if (enemigosActivos[id] < 0) enemigosActivos[id] = 0;
-                    }
-                    enemigoAIdPool.Remove(e);
-                }
+                QuitarDeRegistro(e);
                 enemigosVivos.RemoveAt(i);
             }
-        }
-    }
-
-    private void LimpiarLista()
-    {
-        for (int i = enemigosVivos.Count - 1; i >= 0; i--)
-        {
-            if (enemigosVivos[i] == null || !enemigosVivos[i].activeInHierarchy)
-                enemigosVivos.RemoveAt(i);
         }
     }
 

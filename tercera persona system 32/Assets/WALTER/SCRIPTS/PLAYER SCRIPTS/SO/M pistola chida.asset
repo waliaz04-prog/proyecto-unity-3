@@ -9,13 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 274bfb2ab5377c940b9d9a5467093d79, type: 3}
-  m_Name: MejoraPermanente
+  m_Script: {fileID: 11500000, guid: 8e07d6509db0e654cbef49c93580bf6d, type: 3}
+  m_Name: M pistola chida
   m_EditorClassIdentifier: 
-  nombreItem: VIDA
-  descripcion: Aumenta tu vida maxima
+  nombreItem: munision pistola
+  descripcion: 'balas para pistola chida
+
+'
   icono: {fileID: 0}
-  tipo: 0
-  precioBase: 300
-  multiplicadorPrecio: 1.5
-  valorPorNivel: 10
+  tipoMunicion: 0
+  cantidad: 60
+  precio: 500

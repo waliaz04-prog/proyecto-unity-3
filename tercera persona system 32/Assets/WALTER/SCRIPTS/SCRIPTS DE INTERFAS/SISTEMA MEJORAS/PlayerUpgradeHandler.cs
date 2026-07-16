@@ -29,14 +29,28 @@ public class PlayerUpgradeHandler : MonoBehaviour
         vidaPlayer?.CurarVida(cantidad);
     }
 
-    public void RecargarMunicion()
+    // Suma balas a la reserva de las armas que usen ese tipo de munición.
+    // Lo llaman los ItemMunicion de las máquinas expendedoras.
+    public void AgregarMunicion(TipoMunicion tipo, int cantidad)
     {
         if (sistemaArmas == null) return;
         foreach (WeaponSystem arma in sistemaArmas)
-            arma?.Recargar();
+        {
+            if (arma == null || !arma.UsaMunicion) continue;
+            if (arma.ObtenerTipoMunicion() != tipo) continue;
+            arma.AgregarMunicionReserva(cantidad);
+        }
     }
 
     public void AplicarMejora(TipoMejora tipo, float valor)
+    {
+        AplicarMejora(tipo, valor, -1);
+    }
+
+    // indiceArma: -1 = todas las armas; 0, 1, 2... = solo esa arma
+    // (según el orden del array de WeaponSwitcher).
+    // Las mejoras de jugador (vida, escudo, velocidad) ignoran el índice.
+    public void AplicarMejora(TipoMejora tipo, float valor, int indiceArma)
     {
         switch (tipo)
         {
@@ -53,26 +67,75 @@ public class PlayerUpgradeHandler : MonoBehaviour
                 movimiento?.SubirVelocidad(valor);
                 break;
             case TipoMejora.CadenciaDisparo:
-                if (sistemaArmas == null) break;
-                foreach (WeaponSystem arma in sistemaArmas)
-                    arma?.MejorarCadencia(valor);
-                break;
             case TipoMejora.CapacidadMunicion:
-                if (sistemaArmas == null) break;
-                foreach (WeaponSystem arma in sistemaArmas)
-                    arma?.SubirCapacidadMunicion(Mathf.RoundToInt(valor));
-                break;
             case TipoMejora.VelocidadRecarga:
-                if (sistemaArmas == null) break;
-                foreach (WeaponSystem arma in sistemaArmas)
-                    arma?.MejorarVelocidadRecarga(valor);
+            case TipoMejora.Danio:
+                AplicarMejoraArmas(tipo, valor, indiceArma);
                 break;
+        }
+    }
+
+    private void AplicarMejoraArmas(TipoMejora tipo, float valor, int indiceArma)
+    {
+        if (sistemaArmas == null) return;
+
+        if (indiceArma >= sistemaArmas.Length)
+        {
+            Debug.LogWarning("PlayerUpgradeHandler: índice de arma " + indiceArma + " fuera de rango.");
+            return;
+        }
+
+        for (int i = 0; i < sistemaArmas.Length; i++)
+        {
+            // Con índice válido solo se mejora esa arma; con -1 se mejoran todas.
+            if (indiceArma >= 0 && i != indiceArma) continue;
+
+            WeaponSystem arma = sistemaArmas[i];
+            if (arma == null) continue;
+
+            switch (tipo)
+            {
+                case TipoMejora.CadenciaDisparo:
+                    arma.MejorarCadencia(valor);
+                    break;
+                case TipoMejora.CapacidadMunicion:
+                    arma.SubirCapacidadMunicion(Mathf.RoundToInt(valor));
+                    break;
+                case TipoMejora.VelocidadRecarga:
+                    arma.MejorarVelocidadRecarga(valor);
+                    break;
+                case TipoMejora.Danio:
+                    arma.SubirDano(valor);
+                    break;
+            }
         }
     }
 
     public void DesbloquearArma(int indice)
     {
         weaponSwitcher?.DesbloquearArma(indice);
+    }
+
+    // True si el arma de ese índice ya está desbloqueada.
+    public bool ArmaDesbloqueada(int indice)
+    {
+        if (weaponSwitcher == null) return true;
+        return !weaponSwitcher.EstasBloqueada(indice);
+    }
+
+    // True si el jugador tiene desbloqueada al menos un arma que use este tipo de munición.
+    // Se usa para impedir comprar balas de armas que aún no se compraron.
+    public bool TieneArmaConMunicion(TipoMunicion tipo)
+    {
+        if (sistemaArmas == null) return false;
+        for (int i = 0; i < sistemaArmas.Length; i++)
+        {
+            WeaponSystem arma = sistemaArmas[i];
+            if (arma == null || !arma.UsaMunicion) continue;
+            if (arma.ObtenerTipoMunicion() != tipo) continue;
+            if (ArmaDesbloqueada(i)) return true;
+        }
+        return false;
     }
 
     public void MejorarDanoArma(int indice, float cantidad)
