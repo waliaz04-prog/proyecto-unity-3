@@ -41,6 +41,5 @@ public enum TipoMejora
     VelocidadMovimiento,
     CadenciaDisparo,
     CapacidadMunicion,
-    VelocidadRecarga,
-    Danio
+    VelocidadRecarga
 }

@@ -69,7 +69,6 @@ public class PlayerUpgradeHandler : MonoBehaviour
             case TipoMejora.CadenciaDisparo:
             case TipoMejora.CapacidadMunicion:
             case TipoMejora.VelocidadRecarga:
-            case TipoMejora.Danio:
                 AplicarMejoraArmas(tipo, valor, indiceArma);
                 break;
         }
@@ -103,9 +102,6 @@ public class PlayerUpgradeHandler : MonoBehaviour
                     break;
                 case TipoMejora.VelocidadRecarga:
                     arma.MejorarVelocidadRecarga(valor);
-                    break;
-                case TipoMejora.Danio:
-                    arma.SubirDano(valor);
                     break;
             }
         }

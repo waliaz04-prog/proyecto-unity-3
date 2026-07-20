@@ -111,7 +111,7 @@ public class MaquinaExpendedora : MonoBehaviour
         textoAccion.text = item.ObtenerTextoAccion(nivelActual);
 
         if (textoDescripcion != null)
-            textoDescripcion.text = item.descripcion;
+            textoDescripcion.text = item.ObtenerDescripcion(nivelActual);
     }
 
     private void ReproducirSonido(AudioClip clip)

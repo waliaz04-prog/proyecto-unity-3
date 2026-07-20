@@ -12,6 +12,10 @@ public class ItemArma : ItemMaquina
     [Tooltip("Daño que se suma al arma por cada mejora comprada")]
     public float mejoraDanoPorNivel = 10f;
 
+    [Header("Descripción al mejorar")]
+    [Tooltip("Se muestra cuando el arma ya está desbloqueada y se compran mejoras de daño. La descripción general (arriba) se muestra mientras está bloqueada.")]
+    [TextArea(2, 4)] public string descripcionMejora = "Aumenta el daño del arma.";
+
     public override int ObtenerPrecio(int nivelActual)
     {
         if (nivelActual == 0) return precioDesbloqueo;
@@ -32,4 +36,8 @@ public class ItemArma : ItemMaquina
             return $"E  Comprar {nombreItem}  —  {precioDesbloqueo} pts";
         return $"E  Mejorar {nombreItem}  Lv{nivelActual}  —  {ObtenerPrecio(nivelActual)} pts";
     }
+
+    // Bloqueada: descripción general del arma. Desbloqueada: descripción de la mejora.
+    public override string ObtenerDescripcion(int nivelActual) =>
+        nivelActual == 0 ? descripcion : descripcionMejora;
 }

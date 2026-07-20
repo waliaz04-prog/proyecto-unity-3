@@ -38,6 +38,5 @@ public class ItemMejoraPermanente : ItemMaquina
     private bool EsMejoraDeArma() =>
         tipo == TipoMejora.CadenciaDisparo ||
         tipo == TipoMejora.CapacidadMunicion ||
-        tipo == TipoMejora.VelocidadRecarga ||
-        tipo == TipoMejora.Danio;
+        tipo == TipoMejora.VelocidadRecarga;
 }

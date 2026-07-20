@@ -18,6 +18,10 @@ public abstract class ItemMaquina : ScriptableObject
     // Texto del prompt de interacción.
     public abstract string ObtenerTextoAccion(int nivelActual);
 
+    // Descripción mostrada en el prompt. Las subclases pueden cambiarla
+    // según el nivel (ej. ItemArma: texto de compra vs texto de mejora).
+    public virtual string ObtenerDescripcion(int nivelActual) => descripcion;
+
     // Los consumibles no acumulan nivel — siempre cuestan lo mismo.
     public virtual bool EsConsumible() => false;
 
