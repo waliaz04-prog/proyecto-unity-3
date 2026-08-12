@@ -591,7 +591,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53cbf15de42e5cb4f82454ea1e9b69ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  escudoMaximo: 100
+  escudoMaximo: 50
   tiempoAntesRegenerar: 4
   velocidadRegeneracion: 20
 --- !u!114 &7962001759420471184
@@ -652,7 +652,7 @@ MonoBehaviour:
   meleeTrigger: {fileID: 0}
   animator: {fileID: 0}
   tiempoHitbox: 0.2
-  armaAutomatica: 0
+  armaAutomatica: 1
   puntoDisparo: {fileID: 3268328888273447270}
   efectoDisparo: {fileID: 0}
   balasPorDisparo: 1
@@ -661,7 +661,7 @@ MonoBehaviour:
   tiempoVidaBala: 5
   atravesarEnemigos: 0
   usarMunicion: 1
-  tipoMunicion: 0
+  tipoMunicion: 1
   municionEnCargador: 30
   tamanoCargador: 30
   municionReserva: 90

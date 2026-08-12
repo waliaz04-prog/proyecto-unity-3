@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Mu pistola
   m_EditorClassIdentifier: 
   nombreItem: 'munision  '
-  descripcion: 'balas para pistola chida
+  descripcion: 'balas para pistola
 
 '
   icono: {fileID: 0}

@@ -53,12 +53,12 @@ public class Bala : MonoBehaviour
         float distanciaFrame = velocidad * Time.deltaTime;
         Vector3 origen = transform.position;
 
-        // Rayo que cubre exactamente el trayecto de este frame.
-        if (Physics.Raycast(origen, transform.forward, out RaycastHit impacto, distanciaFrame, capasImpacto, QueryTriggerInteraction.Ignore))
-        {
-            bool balaTermino = ProcesarImpacto(impacto);
-            if (balaTermino) return;
-        }
+        //// Rayo que cubre exactamente el trayecto de este frame.
+        //if (Physics.Raycast(origen, transform.forward, out RaycastHit impacto, distanciaFrame, capasImpacto, QueryTriggerInteraction.Ignore))
+        //{
+        //    bool balaTermino = ProcesarImpacto(impacto);
+        //    if (balaTermino) return;
+        //}
 
         transform.position = origen + transform.forward * distanciaFrame;
 
@@ -68,9 +68,8 @@ public class Bala : MonoBehaviour
     }
 
     // Retorna true si la bala terminó su recorrido (volvió al pool).
-    private bool ProcesarImpacto(RaycastHit impacto)
+    private bool ProcesarImpacto(Collider col)
     {
-        Collider col = impacto.collider;
 
         // La bala del jugador nunca daña al jugador.
         if (esDelJugador && col.CompareTag("Player"))
@@ -119,4 +118,15 @@ public class Bala : MonoBehaviour
         else
             gameObject.SetActive(false);
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("En trigger");
+        if (other.gameObject.CompareTag("Enemy"))
+        {
+            Debug.Log("Impacto a enemigo");
+            ProcesarImpacto(other);
+        }
+    }
+
 }
