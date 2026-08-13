@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Manquina expendedora
+  m_Name: Manquina expendedora 1
   m_Shader: {fileID: 4800000, guid: 0e9d5a909a1f7e84882a534d0d11e49f, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -42,7 +42,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: 4c3f1777ea18b0e4aad3545f96c6ef9c, type: 3}
+        m_Texture: {fileID: 2800000, guid: 5c726e285fb05ad4688c6d340da0c93b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -58,15 +58,15 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
-        m_Texture: {fileID: 2800000, guid: ec633d32b6d88c341bad37bdd2bae6b2, type: 3}
+        m_Texture: {fileID: 2800000, guid: c9591886f4f203549bc7d83c3311bf1a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: de9f28fa4a310d543b82bc277a4a232c, type: 3}
+        m_Texture: {fileID: 2800000, guid: ddf971279ef0371469eb1ca6b362bd5d, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
-        m_Texture: {fileID: 2800000, guid: f1f11a7b4514d494694bb2c8b13a2eb1, type: 3}
+        m_Texture: {fileID: 2800000, guid: 7179eda478404634b933d60cab11b5d3, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -78,7 +78,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
-        m_Texture: {fileID: 2800000, guid: ec633d32b6d88c341bad37bdd2bae6b2, type: 3}
+        m_Texture: {fileID: 2800000, guid: c85d4ded597ff74418408e9748c8df08, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
