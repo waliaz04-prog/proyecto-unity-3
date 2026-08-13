@@ -141,32 +141,35 @@ public class PlayerMovimiento : MonoBehaviour
             Mathf.Abs(x) > 0.01f ||
             Mathf.Abs(z) > 0.01f;
 
-        if (!seEstaMoviendo)
-        {
-            ReproducirEstado(
-                estadoIdle,
-                1f
-            );
+        //if (!seEstaMoviendo)
+        //{
+        //    ReproducirEstado(
+        //        estadoIdle,
+        //        1f
+        //    );
 
-            return;
-        }
+        //    return;
+        //}
 
-        if (Mathf.Abs(z) >= Mathf.Abs(x))
-        {
-            ReproducirEstado(
-                estadoCaminarAdelante,
-                z >= 0f
-                    ? velocidadAnimacionAdelante
-                    : velocidadAnimacionAdelante
-            );
-        }
-        else
-        {
-            ReproducirEstado(
-                estadoCaminarIzquierda,
-                velocidadAnimacionLateral
-            );
-        }
+        animator.SetFloat("VelocidadX", x);
+        animator.SetFloat("VelocidadZ", z);
+
+        //if (Mathf.Abs(z) >= Mathf.Abs(x))
+        //{
+        //    ReproducirEstado(
+        //        estadoCaminarAdelante,
+        //        z >= 0f
+        //            ? velocidadAnimacionAdelante
+        //            : velocidadAnimacionAdelante
+        //    );
+        //}
+        //else
+        //{
+        //    ReproducirEstado(
+        //        estadoCaminarIzquierda,
+        //        velocidadAnimacionLateral
+        //    );
+        //}
     }
 
     private void ReproducirEstado(
@@ -179,15 +182,15 @@ public class PlayerMovimiento : MonoBehaviour
         int hashEstado =
             Animator.StringToHash(nombreEstado);
 
-        if (hashEstadoActual != hashEstado)
-        {
-            animator.CrossFade(
-                hashEstado,
-                duracionTransicionAnimacion
-            );
+        //if (hashEstadoActual != hashEstado)
+        //{
+        //    animator.CrossFade(
+        //        hashEstado,
+        //        duracionTransicionAnimacion
+        //    );
 
-            hashEstadoActual = hashEstado;
-        }
+        //    hashEstadoActual = hashEstado;
+        //}
 
         animator.speed = Mathf.Max(
             0.01f,
@@ -318,10 +321,10 @@ public class PlayerMovimiento : MonoBehaviour
 
             if (animator != null)
             {
-                ReproducirEstado(
-                    estadoIdle,
-                    1f
-                );
+                //ReproducirEstado(
+                //    estadoIdle,
+                //    1f
+                //);
             }
         }
     }

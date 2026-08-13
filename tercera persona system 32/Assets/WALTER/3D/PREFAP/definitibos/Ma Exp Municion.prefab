@@ -70,7 +70,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a9dc7cb4a97c5e74b82344c5aea59ee2, type: 2}
+  - {fileID: 2100000, guid: 42901943285e4d6489742580960d5a9d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -108,9 +108,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   item: {fileID: 11400000, guid: 33190ec2b60fb0e4ba884233386e0560, type: 2}
   teclaInteraccion: 101
-  panelPrompt: {fileID: 0}
-  textoAccion: {fileID: 0}
-  textoDescripcion: {fileID: 0}
+  panelPrompt: {fileID: 7116663291693490901, guid: 7ed599ce20ecba842be7d1ed2d7e4d26, type: 3}
+  textoAccion: {fileID: 2574650588981203497, guid: a7771591459419d438a873c67430cc73, type: 3}
+  textoDescripcion: {fileID: 6374120206534863475, guid: b73f015c714687a4183a5c6e8f2c4387, type: 3}
   audioFeedback: {fileID: 0}
   sonidoCompra: {fileID: 0}
   sonidoSinPuntos: {fileID: 0}

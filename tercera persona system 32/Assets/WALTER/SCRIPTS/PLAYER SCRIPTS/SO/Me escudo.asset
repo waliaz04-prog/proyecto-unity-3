@@ -17,7 +17,7 @@ MonoBehaviour:
   icono: {fileID: 0}
   tipo: 1
   precioBase: 100
-  multiplicadorPrecio: 1.5
+  multiplicadorPrecio: 1.1
   valorPorNivel: 3
   mejorarSoloUnArma: 1
   indiceArma: 0

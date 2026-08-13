@@ -293,7 +293,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dba0fd7b184de9246bc2f6de8964169c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBase
-  jugador: {fileID: 2746549096381522428, guid: c6b2074168de1fb4c923ffb3f1f369c0, type: 3}
+  jugador: {fileID: 776165663570358951, guid: d4759ce2a38e050418d15cc87c3d0c66, type: 3}
 --- !u!114 &2992551048097908561
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -306,7 +306,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 931fef98ed7d0974baedddc708977cf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemigoAlien1
-  jugador: {fileID: 2746549096381522428, guid: c6b2074168de1fb4c923ffb3f1f369c0, type: 3}
+  jugador: {fileID: 776165663570358951, guid: d4759ce2a38e050418d15cc87c3d0c66, type: 3}
   distanciaIdeal: 2
   toleranciaDistancia: 0.11
   frecuenciaActualizacionRuta: 0.2
@@ -368,7 +368,7 @@ MonoBehaviour:
   tipoEnemigo: 0
   sonidoMuerte: {fileID: 8300000, guid: a6646193eab7c7545bd2bb8bbcc94322, type: 3}
   animator: {fileID: 7553146078198506543}
-  duracionAnimacionMuerte: 1.5
+  duracionAnimacionMuerte: 1
 --- !u!114 &1856827231063228038
 MonoBehaviour:
   m_ObjectHideFlags: 0

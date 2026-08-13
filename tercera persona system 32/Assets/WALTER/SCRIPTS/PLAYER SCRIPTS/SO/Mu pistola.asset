@@ -19,4 +19,4 @@ MonoBehaviour:
   icono: {fileID: 0}
   tipoMunicion: 1
   cantidad: 60
-  precio: 500
+  precio: 80

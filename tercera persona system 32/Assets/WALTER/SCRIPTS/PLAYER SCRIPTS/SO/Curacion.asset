@@ -18,5 +18,5 @@ MonoBehaviour:
 '
   icono: {fileID: 0}
   tipo: 0
-  precio: 200
+  precio: 100
   valor: 50

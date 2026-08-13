@@ -54,11 +54,5 @@ MonoBehaviour:
   - id: Bala
     prefab: {fileID: 6514964250100746237, guid: 4cb60fe6255642142982c1b39f1d58fc, type: 3}
     cantidadInicial: 50
-  - id: 
-    prefab: {fileID: 0}
-    cantidadInicial: 0
-  - id: 
-    prefab: {fileID: 0}
-    cantidadInicial: 0
   permitirExpansionAutomatica: 0
   mostrarLogs: 1

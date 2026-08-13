@@ -29,6 +29,10 @@ public class AtaqueEnemigo : MonoBehaviour
     private Transform objetivo;
     private float timerAtaque;
 
+    private void Start()
+    {
+        ani = GetComponent<Animator>();
+    }
     private void Update()
     {
         if (objetivo == null)
@@ -64,6 +68,7 @@ public class AtaqueEnemigo : MonoBehaviour
 
         if (meleeTrigger != null)
         {
+            ani.SetTrigger("Atacar");
             meleeTrigger.ActivarTrigger();
             StartCoroutine(RutinaHitbox());
         }
@@ -75,6 +80,8 @@ public class AtaqueEnemigo : MonoBehaviour
         if (meleeTrigger != null) meleeTrigger.DesactivarTrigger();
     }
 
+
+    private Animator ani;
     public void ConfigurarDanio(float d) => danio = d;
     public float ObtenerDanio() => danio;
 }
