@@ -32,74 +32,81 @@ public class EnemigoAlien1 : EnemyBase
         agent = GetComponent<NavMeshAgent>();
         ataqueEnemigo = GetComponent<AtaqueEnemigo>();
         ConfigurarAgente();
-        base.Awake(); // busca el jugador en caché estático
-        if (jugador != null)
-            ataqueEnemigo?.ConfigurarObjetivo(jugador);
+        base.Awake();
+    }
+
+    private void ConfigurarAgente()
+    {
+        if (agent == null) return;
+        agent.radius = radioAgente;
+        agent.updateRotation = false;
     }
 
     private void OnEnable()
     {
+        VerificarNavMesh();
         timerRuta = 0f;
         estaRetrocediendo = false;
-        if (agent != null) agent.enabled = true;
-        VerificarNavMesh();
     }
 
     private void Update()
     {
         if (!TieneJugador()) return;
 
-        if (!agent.isOnNavMesh) return;
-
-        ActualizarMovimiento();
         RotarHaciaJugador();
 
-        if (ataqueEnemigo != null)
-            ataqueEnemigo.IntentarAtacar();
-    }
-
-    private void ConfigurarAgente()
-    {
-        // speed y acceleration los controla StatsEnemigo
-        agent.radius = radioAgente;
-        agent.updateRotation = false;
-        agent.updateUpAxis = false;
-    }
-
-    private void ActualizarMovimiento()
-    {
         timerRuta += Time.deltaTime;
-        if (timerRuta < frecuenciaActualizacionRuta) return;
-        timerRuta = 0f;
-
-        // Restaurar velocidad base antes de recalcular para evitar acumulación
-        if (estaRetrocediendo && multiplicadorVelocidadRetirada != 1f)
-            agent.speed /= multiplicadorVelocidadRetirada;
-        estaRetrocediendo = false;
-
-        float distancia = Vector3.Distance(transform.position, jugador.position);
-
-        if (distancia > distanciaIdeal + toleranciaDistancia)
+        if (timerRuta >= frecuenciaActualizacionRuta)
         {
+            timerRuta = 0f;
+            ActualizarDestino();
+        }
+    }
+
+    private void ActualizarDestino()
+    {
+        if (agent == null || !agent.isOnNavMesh) return;
+
+        float distanciaAlJugadorSqr = (jugador.position - transform.position).sqrMagnitude;
+        float distMinSqr = (distanciaIdeal - toleranciaDistancia) * (distanciaIdeal - toleranciaDistancia);
+        float distMaxSqr = (distanciaIdeal + toleranciaDistancia) * (distanciaIdeal + toleranciaDistancia);
+
+        if (distanciaAlJugadorSqr > distMaxSqr)
+        {
+            if (estaRetrocediendo)
+            {
+                estaRetrocediendo = false;
+                if (multiplicadorVelocidadRetirada != 1f)
+                    agent.speed /= multiplicadorVelocidadRetirada;
+            }
             agent.isStopped = false;
             agent.SetDestination(jugador.position);
         }
-        else if (distancia < distanciaIdeal - toleranciaDistancia)
+        else if (distanciaAlJugadorSqr < distMinSqr)
         {
-            Vector3 direccion = (transform.position - jugador.position).normalized;
-            Vector3 posicionRetirada = jugador.position + direccion * distanciaIdeal;
+            Vector3 direccionRetirada = (transform.position - jugador.position).normalized;
+            Vector3 posicionRetirada = transform.position + direccionRetirada * distanciaIdeal;
 
             if (NavMesh.SamplePosition(posicionRetirada, out NavMeshHit hit, radioBusquedaNavMesh, NavMesh.AllAreas))
             {
                 agent.isStopped = false;
-                estaRetrocediendo = true;
-                if (multiplicadorVelocidadRetirada != 1f)
-                    agent.speed *= multiplicadorVelocidadRetirada;
+                if (!estaRetrocediendo)
+                {
+                    estaRetrocediendo = true;
+                    if (multiplicadorVelocidadRetirada != 1f)
+                        agent.speed *= multiplicadorVelocidadRetirada;
+                }
                 agent.SetDestination(hit.position);
             }
         }
         else
         {
+            if (estaRetrocediendo)
+            {
+                estaRetrocediendo = false;
+                if (multiplicadorVelocidadRetirada != 1f)
+                    agent.speed /= multiplicadorVelocidadRetirada;
+            }
             agent.isStopped = true;
         }
     }
@@ -128,7 +135,5 @@ public class EnemigoAlien1 : EnemyBase
         if (!mostrarGizmos) return;
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, distanciaIdeal);
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, distanciaIdeal + toleranciaDistancia);
     }
 }

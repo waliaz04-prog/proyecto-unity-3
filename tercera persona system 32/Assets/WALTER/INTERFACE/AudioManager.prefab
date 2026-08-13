@@ -45,11 +45,138 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
   Musica:
-  - soundefect: 0
-    name: 
-    clip: {fileID: 0}
-    volume: 0
+  - nombre: Creditos
+    clip: {fileID: 8300000, guid: ab373e91cdbd02f40869460fcca6810e, type: 3}
+    volumen: 0.434
+    pitch: 0
+    loop: 1
+    tipoAudio: 1
+    source: {fileID: 0}
+  - nombre: Gamer Over
+    clip: {fileID: 8300000, guid: 2f1bec8a507e2f04ca28b0f9b74d6db3, type: 3}
+    volumen: 0.417
+    pitch: 1.31
+    loop: 1
+    tipoAudio: 1
+    source: {fileID: 0}
+  - nombre: Level 1
+    clip: {fileID: 8300000, guid: 02c4128f5bb58594585c4ba2d031fb85, type: 3}
+    volumen: 0.454
+    pitch: 1.473
+    loop: 1
+    tipoAudio: 1
+    source: {fileID: 0}
+  - nombre: Menu
+    clip: {fileID: 8300000, guid: 13406d9dd8cdd3c4a961a79803f50d0a, type: 3}
+    volumen: 0.415
+    pitch: 1.245
+    loop: 1
+    tipoAudio: 1
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 8300000, guid: 4754cb79bf084a44bb06eeeba718a9ca, type: 3}
+    volumen: 0.395
+    pitch: 1.237
     loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 8300000, guid: a6646193eab7c7545bd2bb8bbcc94322, type: 3}
+    volumen: 0.451
+    pitch: 1.424
+    loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 8300000, guid: 1d05b016f454ccf48bbc9d0018303948, type: 3}
+    volumen: 0.479
+    pitch: 1
+    loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 8300000, guid: 85773a7fb458fe2408929df32289fbb6, type: 3}
+    volumen: 0.479
+    pitch: 1
+    loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 8300000, guid: 5e13d9f4e3b947948ae0b5f5f926c26d, type: 3}
+    volumen: 0.479
+    pitch: 1
+    loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 8300000, guid: a8bc4e55eff38d441a0df7e3ae00b10c, type: 3}
+    volumen: 0.479
+    pitch: 1
+    loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 8300000, guid: 41793f5e352ed18409e2e36cace33cba, type: 3}
+    volumen: 0.479
+    pitch: 1
+    loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 8300000, guid: 4509dce361ec3f94d8d0acdc35aba855, type: 3}
+    volumen: 0.479
+    pitch: 1
+    loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 8300000, guid: 20cd09ccb16a09746baea488da260d3f, type: 3}
+    volumen: 0.479
+    pitch: 1
+    loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 8300000, guid: 95c752889340d7642859c0b17b39d1f6, type: 3}
+    volumen: 0.479
+    pitch: 1
+    loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 8300000, guid: 3e5888038c860d84b880817305ce992e, type: 3}
+    volumen: 0.479
+    pitch: 1
+    loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 0}
+    volumen: 0.479
+    pitch: 1
+    loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 0}
+    volumen: 0.479
+    pitch: 1
+    loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 0}
+    volumen: 0.479
+    pitch: 1
+    loop: 0
+    tipoAudio: 0
+    source: {fileID: 0}
+  - nombre: 
+    clip: {fileID: 0}
+    volumen: 0.479
+    pitch: 1
+    loop: 0
+    tipoAudio: 0
     source: {fileID: 0}
   volumenMusica: 1
   volumenEfectos: 1

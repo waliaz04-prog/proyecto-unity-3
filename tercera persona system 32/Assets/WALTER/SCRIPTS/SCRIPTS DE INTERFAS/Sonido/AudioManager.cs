@@ -3,139 +3,208 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    public static AudioManager Instance;
+    public static AudioManager Instance { get; private set; }
 
     [Header("Lista de sonidos (efectos y música)")]
     public Sonido[] Musica;
 
     [Header("Volumen General")]
-    [Tooltip("Volumen de todos los sonidos marcados como música (0 a 1). Se guarda automáticamente entre partidas.")]
     [Range(0f, 1f)][SerializeField] private float volumenMusica = 1f;
-    [Tooltip("Volumen de todos los sonidos marcados como efecto (0 a 1). Se guarda automáticamente entre partidas.")]
     [Range(0f, 1f)][SerializeField] private float volumenEfectos = 1f;
 
-    // Mismas claves que usaba antes ControladorVolumen, para no perder el
-    // volumen que el jugador ya haya guardado.
     private const string ClaveVolumenMusica = "VolumenMusica";
     private const string ClaveVolumenEfectos = "VolumenSonidos";
 
-    private string currentSong;
+    private string cancionActual;
 
     public float VolumenMusica => volumenMusica;
     public float VolumenEfectos => volumenEfectos;
 
     private void Awake()
     {
-        if (Instance == null)
+        if (Instance != null && Instance != this)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
+            UnityEngine.Object.Destroy(gameObject);
             return;
         }
 
-        volumenMusica = PlayerPrefs.GetFloat(ClaveVolumenMusica, volumenMusica);
-        volumenEfectos = PlayerPrefs.GetFloat(ClaveVolumenEfectos, volumenEfectos);
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        CargarAjustesVolumen();
+        InicializarFuentes();
+    }
+
+    private void CargarAjustesVolumen()
+    {
+        volumenMusica = PlayerPrefs.GetFloat(ClaveVolumenMusica, 1f);
+        volumenEfectos = PlayerPrefs.GetFloat(ClaveVolumenEfectos, 1f);
+    }
+
+    private void InicializarFuentes()
+    {
+        if (Musica == null) return;
 
         foreach (Sonido s in Musica)
         {
-            s.source = gameObject.AddComponent<AudioSource>();
-            s.source.clip = s.clip;
-            s.source.volume = VolumenFinal(s);
-            s.source.loop = s.loop;
-            s.source.playOnAwake = false;
+            if (s == null) continue;
+
+            AudioSource src = gameObject.AddComponent<AudioSource>();
+            src.clip = s.clip;
+            src.loop = s.loop;
+            src.pitch = s.pitch; // Se sincronizó con Sonido.cs
+            src.playOnAwake = false;
+            s.source = src;
+
+            ActualizarVolumenFuente(s);
         }
     }
 
-    // Reproduce un sonido. Si es loop no lo reinicia si ya está sonando.
-    public void Play(string nombre)
+    // --- MÉTODOS DE REPRODUCCIÓN POR NOMBRE (Para Música y UI) ---
+
+    public void ReproducirSonido(string nombre)
     {
         Sonido s = BuscarSonido(nombre);
-        if (s == null) return;
+        if (s == null || s.source == null) return;
 
-        if (s.loop)
-        {
-            if (!s.source.isPlaying) s.source.Play();
-        }
-        else
+        ActualizarVolumenFuente(s);
+        if (s.tipoAudio == TipoAudio.Musica)
         {
             s.source.Play();
         }
-
-        if (!s.soundefect) currentSong = s.name;
+        else
+        {
+            s.source.PlayOneShot(s.clip);
+        }
     }
 
-    // Reproduce un efecto corto sin interrumpir otras fuentes.
-    public void PlayOneShot(string nombre)
+    public void ReproducirMusica(string nombre)
+    {
+        if (cancionActual == nombre && EstaSonando(nombre)) return;
+
+        DetenerTodaLaMusica();
+
+        Sonido s = BuscarSonido(nombre);
+        if (s != null && s.source != null)
+        {
+            cancionActual = nombre;
+            ActualizarVolumenFuente(s);
+            s.source.Play();
+        }
+    }
+
+    public void DetenerSonido(string nombre)
     {
         Sonido s = BuscarSonido(nombre);
-        if (s == null) return;
-        // s.source.volume ya refleja el volumen general de su categoría
-        // (se actualiza en AplicarVolumenPorCategoria), así que PlayOneShot
-        // lo usa automáticamente como base sin necesitar un parámetro extra.
-        s.source.PlayOneShot(s.clip);
+        if (s != null && s.source != null && s.source.isPlaying)
+        {
+            s.source.Stop();
+        }
     }
 
-    public void Stop(string nombre)
+    public void DetenerTodaLaMusica()
     {
-        Sonido s = BuscarSonido(nombre);
-        if (s == null) return;
-        s.source.Stop();
-    }
+        if (Musica == null) return;
 
-    public void StopMusic()
-    {
         foreach (Sonido s in Musica)
         {
-            if (!s.soundefect && s.source.isPlaying)
-                s.source.Stop();
+            if (s != null && s.tipoAudio == TipoAudio.Musica && s.source != null)
+            {
+                if (s.source.isPlaying)
+                {
+                    s.source.Stop();
+                }
+            }
         }
-        currentSong = null;
+        cancionActual = string.Empty;
     }
 
-    public bool IsPlaying(string nombre)
+    public bool EstaSonando(string nombre)
     {
         Sonido s = BuscarSonido(nombre);
-        return s != null && s.source.isPlaying;
+        return s != null && s.source != null && s.source.isPlaying;
     }
 
-    // Llamar desde el slider de Ajustes ("Volumen de Musica") en su OnValueChanged.
+    // --- MÉTODOS DE REPRODUCCIÓN DIRECTA (Para Enemigos y Armas) ---
+
+    public void ReproducirClip2D(AudioClip clip, float volumenLocal = 1f)
+    {
+        if (clip == null) return;
+
+        GameObject tempGO = new GameObject("TempAudio2D");
+        AudioSource source = tempGO.AddComponent<AudioSource>();
+        source.clip = clip;
+        source.spatialBlend = 0f;
+        source.volume = volumenLocal * volumenEfectos;
+        source.Play();
+
+        UnityEngine.Object.Destroy(tempGO, clip.length + 0.1f);
+    }
+
+    public void ReproducirClip3D(AudioClip clip, Vector3 posicion, float volumenLocal = 1f)
+    {
+        if (clip == null) return;
+
+        GameObject tempGO = new GameObject("TempAudio3D");
+        tempGO.transform.position = posicion;
+
+        AudioSource source = tempGO.AddComponent<AudioSource>();
+        source.clip = clip;
+        source.spatialBlend = 1f;
+        source.minDistance = 2f;
+        source.maxDistance = 35f;
+        source.rolloffMode = AudioRolloffMode.Logarithmic;
+        source.volume = volumenLocal * volumenEfectos;
+        source.Play();
+
+        UnityEngine.Object.Destroy(tempGO, clip.length + 0.1f);
+    }
+
+    // --- CONTROL DE VOLUMEN (Sliders UI) ---
+
     public void AjustarVolumenMusica(float valor)
     {
         volumenMusica = Mathf.Clamp01(valor);
         PlayerPrefs.SetFloat(ClaveVolumenMusica, volumenMusica);
-        AplicarVolumenPorCategoria(esEfecto: false);
+        AplicarVolumenPorCategoria(TipoAudio.Musica);
     }
 
-    // Llamar desde el slider de Ajustes ("Volumen de Sonidos") en su OnValueChanged.
     public void AjustarVolumenEfectos(float valor)
     {
         volumenEfectos = Mathf.Clamp01(valor);
         PlayerPrefs.SetFloat(ClaveVolumenEfectos, volumenEfectos);
-        AplicarVolumenPorCategoria(esEfecto: true);
+        AplicarVolumenPorCategoria(TipoAudio.Efectos);
     }
 
-    private void AplicarVolumenPorCategoria(bool esEfecto)
+    private void AplicarVolumenPorCategoria(TipoAudio tipo)
     {
+        if (Musica == null) return;
+
         foreach (Sonido s in Musica)
         {
-            if (s.soundefect != esEfecto) continue;
+            if (s == null || s.tipoAudio != tipo) continue;
             if (s.source != null)
                 s.source.volume = VolumenFinal(s);
         }
     }
 
-    // Volumen final = volumen propio del clip (0-1, autoral) multiplicado por
-    // el volumen general de su categoría (música o efectos).
-    private float VolumenFinal(Sonido s) => s.volume * (s.soundefect ? volumenEfectos : volumenMusica);
+    private float VolumenFinal(Sonido s) => s.volumen * (s.tipoAudio == TipoAudio.Efectos ? volumenEfectos : volumenMusica);
+
+    private void ActualizarVolumenFuente(Sonido s)
+    {
+        if (s != null && s.source != null)
+            s.source.volume = VolumenFinal(s);
+    }
 
     private Sonido BuscarSonido(string nombre)
     {
-        Sonido s = Array.Find(Musica, sonido => sonido.name == nombre);
-        if (s == null) Debug.LogWarning("AudioManager: No se encontró el sonido '" + nombre + "'");
-        return s;
+        if (Musica == null) return null;
+
+        foreach (Sonido s in Musica)
+        {
+            if (s != null && s.nombre == nombre)
+                return s;
+        }
+        return null;
     }
 }

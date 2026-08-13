@@ -23,8 +23,6 @@ public enum TipoConsumible
     CuracionInstantanea
 }
 
-// Tipos de munición del juego. Cada arma de fuego usa uno,
-// y los ítems de munición de las máquinas venden por tipo.
 public enum TipoMunicion
 {
     Pistola,

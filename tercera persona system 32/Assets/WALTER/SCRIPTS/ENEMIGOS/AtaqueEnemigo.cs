@@ -1,171 +1,80 @@
-// Fusión de DisparadorEnemigo y EnemyAttack. Usar ModoAtaque para elegir comportamiento.
+using System.Collections;
 using UnityEngine;
 
 public class AtaqueEnemigo : MonoBehaviour
 {
-    public enum ModoAtaque
-    {
-        Melee,
-        Distancia
-    }
+    public enum ModoAtaque { Melee, Distancia }
 
     [Header("Modo")]
     [SerializeField] private ModoAtaque modoAtaque = ModoAtaque.Melee;
 
-    [Header("Daño")]
-    [Tooltip("Valor de referencia. StatsEnemigo lo sobreescribe con ConfigurarDanio() al inicializar.")]
-    [SerializeField] private float danio = 10f;
+    [Header("Audio Ataque")]
+    [SerializeField] private AudioClip sonidoAtaque;
 
-    [Header("Ataque")]
+    [Header("Daño")]
+    [SerializeField] private float danio = 10f;
     [SerializeField] private float tiempoEntreAtaques = 2f;
     [SerializeField] private float distanciaAtaque = 2.5f;
 
-    [Header("Melee (Box Collider)")]
-    [Tooltip("Trigger que se activa/desactiva durante el golpe cuerpo a cuerpo. Si se deja vacío, se usa daño instantáneo por distancia (comportamiento anterior).")]
+    [Header("Melee")]
     [SerializeField] private EnemigoMeleeTrigger meleeTrigger;
-    [Tooltip("Segundos que el hitbox permanece activo por cada golpe.")]
     [SerializeField] private float tiempoHitbox = 0.3f;
 
-    [Header("Disparo (solo modo Distancia)")]
-    [Tooltip("Punto desde donde sale la bala. Si se deja vacío, el ataque a distancia hace daño instantáneo (comportamiento anterior).")]
+    [Header("Disparo")]
     [SerializeField] private Transform puntoDisparo;
-    [Tooltip("Id del pool de la bala enemiga. Usa un prefab distinto al de las balas del jugador para diferenciarlas visualmente.")]
-    [SerializeField] private string idPoolBala = "balaEnemigo";
-    [Tooltip("Velocidad de la bala. Súbela para enemigos más peligrosos, bájala para dar tiempo a esquivar.")]
+    [SerializeField] private string idPoolBala = "bala_enemigo";
     [SerializeField] private float velocidadBala = 40f;
-    [SerializeField] private float tiempoVidaBala = 5f;
-    [SerializeField] private bool atravesarJugador;
+    [SerializeField] private float tiempoVidaBala = 4f;
 
-    [Header("Objetivo")]
-    [SerializeField] private Transform objetivo;
+    private Transform objetivo;
+    private float timerAtaque;
 
-    [Header("Animación")]
-    [Tooltip("Si se deja vacío, se busca automáticamente en este GameObject.")]
-    [SerializeField] private Animator animator;
-
-    [Header("Debug")]
-    [SerializeField] private bool mostrarLogs = false;
-
-    private float siguienteAtaque;
-    private VidaPlayer vidaPlayerCacheada;
-
-    private static readonly int AnimAtacar = Animator.StringToHash("Atacar");
-
-    private void Awake()
-    {
-        // Ajustar distancia por defecto según modo si no fue modificada en Inspector
-        if (modoAtaque == ModoAtaque.Distancia && distanciaAtaque == 2.5f)
-            distanciaAtaque = 20f;
-
-        if (animator == null)
-            animator = GetComponent<Animator>();
-
-        BuscarJugador();
-    }
-
-    private void BuscarJugador()
-    {
-        if (objetivo != null) return;
-
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            objetivo = player.transform;
-            vidaPlayerCacheada = player.GetComponent<VidaPlayer>();
-        }
-    }
-
-    public void ConfigurarObjetivo(Transform nuevoObjetivo)
-    {
-        objetivo = nuevoObjetivo;
-        vidaPlayerCacheada = nuevoObjetivo != null ? nuevoObjetivo.GetComponent<VidaPlayer>() : null;
-    }
-
-    public void ConfigurarDanio(float nuevoDanio)
-    {
-        danio = nuevoDanio;
-    }
-
-    public float ObtenerDanio() => danio;
-
-    // Ajusta la velocidad de la bala en tiempo real (ej. escalado por oleada u otro sistema de stats).
-    public void ConfigurarVelocidadBala(float nuevaVelocidad)
-    {
-        velocidadBala = nuevaVelocidad;
-    }
-
-    public void IntentarAtacar()
+    private void Update()
     {
         if (objetivo == null)
         {
-            BuscarJugador();
+            GameObject p = GameObject.FindGameObjectWithTag("Player");
+            if (p != null) objetivo = p.transform;
             return;
         }
 
-        if (Time.time < siguienteAtaque) return;
+        timerAtaque += Time.deltaTime;
+        float distSqr = (objetivo.position - transform.position).sqrMagnitude;
 
-        float distancia = Vector3.Distance(transform.position, objetivo.position);
-        if (distancia > distanciaAtaque) return;
+        if (distSqr <= distanciaAtaque * distanciaAtaque && timerAtaque >= tiempoEntreAtaques)
+        {
+            timerAtaque = 0f;
+            EjecutarAtaque();
+        }
+    }
 
-        siguienteAtaque = Time.time + tiempoEntreAtaques;
-
-        // Se dispara una sola vez por ataque, cubre tanto melee como distancia.
-        if (animator != null)
-            animator.SetTrigger(AnimAtacar);
+    private void EjecutarAtaque()
+    {
+        if (AudioManager.Instance != null && sonidoAtaque != null)
+            AudioManager.Instance.ReproducirClip3D(sonidoAtaque, transform.position);
 
         if (modoAtaque == ModoAtaque.Distancia && puntoDisparo != null)
         {
-            Disparar();
+            Vector3 dir = (objetivo.position - puntoDisparo.position).normalized;
+            GameObject balaObj = PoolManager.Instance.ObtenerObjeto(idPoolBala, puntoDisparo.position, Quaternion.LookRotation(dir));
+            if (balaObj != null && balaObj.TryGetComponent(out Bala bala))
+                bala.Configurar(danio, velocidadBala, tiempoVidaBala, false, false);
             return;
         }
 
-        AtacarCuerpoACuerpo();
-    }
-
-    // Ataque cuerpo a cuerpo. Si hay un EnemigoMeleeTrigger asignado, el daño lo
-    // aplica el collider al tocar al jugador durante la ventana de tiempoHitbox.
-    // Sin trigger asignado, mantiene el comportamiento anterior: daño instantáneo por distancia.
-    private void AtacarCuerpoACuerpo()
-    {
         if (meleeTrigger != null)
         {
             meleeTrigger.ActivarTrigger();
-            Invoke(nameof(DesactivarMeleeTrigger), tiempoHitbox);
-            if (mostrarLogs) Debug.Log(gameObject.name + " activó hitbox de ataque (" + modoAtaque + ").");
-            return;
+            StartCoroutine(RutinaHitbox());
         }
-
-        if (vidaPlayerCacheada == null)
-            vidaPlayerCacheada = objetivo.GetComponent<VidaPlayer>();
-
-        if (vidaPlayerCacheada == null) return;
-
-        vidaPlayerCacheada.RecibirDanio(danio);
-        if (mostrarLogs) Debug.Log(gameObject.name + " atacó al jugador (" + modoAtaque + ").");
     }
 
-    private void DesactivarMeleeTrigger()
+    private IEnumerator RutinaHitbox()
     {
-        if (meleeTrigger != null)
-            meleeTrigger.DesactivarTrigger();
+        yield return new WaitForSeconds(tiempoHitbox);
+        if (meleeTrigger != null) meleeTrigger.DesactivarTrigger();
     }
 
-    // Dispara una bala real hacia el jugador. Usa el mismo pool/script Bala que el jugador,
-    // con un idPool distinto para que el prefab (y por lo tanto la apariencia) sea diferente.
-    private void Disparar()
-    {
-        if (PoolManager.Instance == null) return;
-
-        Vector3 direccion = (objetivo.position - puntoDisparo.position).normalized;
-
-        GameObject balaObj = PoolManager.Instance.ObtenerObjeto(
-            idPoolBala, puntoDisparo.position, Quaternion.LookRotation(direccion));
-
-        if (balaObj == null) return;
-
-        if (balaObj.TryGetComponent(out Bala bala))
-            bala.Configurar(danio, velocidadBala, tiempoVidaBala, atravesarJugador, disparadoPorJugador: false);
-
-        if (mostrarLogs) Debug.Log(gameObject.name + " disparó al jugador.");
-    }
+    public void ConfigurarDanio(float d) => danio = d;
+    public float ObtenerDanio() => danio;
 }

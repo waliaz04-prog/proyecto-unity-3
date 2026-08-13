@@ -366,9 +366,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ControladorEnemigo
   tipoEnemigo: 0
-  animator: {fileID: 0}
+  sonidoMuerte: {fileID: 8300000, guid: a6646193eab7c7545bd2bb8bbcc94322, type: 3}
+  animator: {fileID: 7553146078198506543}
   duracionAnimacionMuerte: 1.5
-  mostrarLogs: 0
 --- !u!114 &1856827231063228038
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -382,19 +382,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AtaqueEnemigo
   modoAtaque: 0
+  sonidoAtaque: {fileID: 8300000, guid: 20cd09ccb16a09746baea488da260d3f, type: 3}
   danio: 10
   tiempoEntreAtaques: 1.5
   distanciaAtaque: 6
-  meleeTrigger: {fileID: 0}
+  meleeTrigger: {fileID: 5691404789560206748}
   tiempoHitbox: 0.3
   puntoDisparo: {fileID: 0}
   idPoolBala: 
   velocidadBala: 40
   tiempoVidaBala: 5
-  atravesarJugador: 0
-  objetivo: {fileID: 2746549096381522428, guid: c6b2074168de1fb4c923ffb3f1f369c0, type: 3}
-  animator: {fileID: 0}
-  mostrarLogs: 0
 --- !u!95 &7553146078198506543
 Animator:
   serializedVersion: 7

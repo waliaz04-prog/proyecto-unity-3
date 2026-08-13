@@ -25,22 +25,35 @@ public class WeaponSystem : MonoBehaviour
     [SerializeField] private float tiempoVidaBala = 5f;
     [SerializeField] private bool atravesarEnemigos;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip sonidoDisparo;
+    [SerializeField] private AudioClip sonidoRecarga;
+    [SerializeField] private AudioClip sonidoSinMunicion;
+    [SerializeField] private AudioClip sonidoMelee;
+
     [Header("Munición")]
     [SerializeField] private bool usarMunicion = true;
+
     [Tooltip("Tipo de balas que usa esta arma. Los ítems de munición de las máquinas venden por tipo.")]
     [SerializeField] private TipoMunicion tipoMunicion = TipoMunicion.Pistola;
+
     [Tooltip("Balas dentro del arma (cargador)")]
     [FormerlySerializedAs("municionActual")]
     [SerializeField] private int municionEnCargador = 30;
+
     [Tooltip("Capacidad máxima del cargador")]
     [FormerlySerializedAs("municionMaxima")]
     [SerializeField] private int tamanoCargador = 30;
+
     [Tooltip("Balas en la mochila (reserva de esta arma)")]
     [SerializeField] private int municionReserva = 90;
+
     [Tooltip("Máximo de balas que caben en la mochila")]
     [SerializeField] private int reservaMaxima = 300;
+
     [Tooltip("Segundos que tarda la recarga con la tecla R")]
     [SerializeField] private float tiempoRecarga = 1.5f;
+
     [Tooltip("Al comprar mejora de capacidad: reserva máxima ganada por cada bala de cargador ganada. Ej: mejora de 10 balas × 3 = +30 de reserva máxima")]
     [SerializeField] private float multiplicadorMejoraReserva = 3f;
 
@@ -53,12 +66,15 @@ public class WeaponSystem : MonoBehaviour
     private float siguienteAtaque;
     private bool recargando;
     private float finRecarga;
+
     private Camera camaraPrincipal;
+
     private readonly Vector3 centroViewport = new Vector3(0.5f, 0.5f, 0f);
 
     public bool EstaRecargando => recargando;
-    // True solo si el arma es de fuego y consume balas (para HUD y compras).
-    public bool UsaMunicion => tipoArma == WeaponType.Firearm && usarMunicion;
+
+    public bool UsaMunicion =>
+        tipoArma == WeaponType.Firearm && usarMunicion;
 
     private void Awake()
     {
@@ -66,53 +82,74 @@ public class WeaponSystem : MonoBehaviour
             animator = GetComponent<Animator>();
 
         camaraPrincipal = Camera.main;
+
+        ValidarConfiguracion();
     }
 
     private void OnDisable()
     {
-        // Cambiar de arma cancela la recarga en curso.
-        // No se pierden balas: la transferencia ocurre solo al completarse.
         recargando = false;
     }
 
     private void Update()
     {
-        // Update() sigue ejecutándose aunque Time.timeScale sea 0 (solo deltaTime
-        // se congela), así que sin este chequeo se podría seguir disparando y
-        // recargando durante la pausa.
-        if (Time.timeScale == 0f) return;
+        if (Time.timeScale == 0f)
+            return;
 
         switch (tipoArma)
         {
             case WeaponType.Melee:
-                if (Time.time >= siguienteAtaque && Input.GetMouseButtonDown(0))
-                    AtaqueMelee();
+                ActualizarMelee();
                 break;
 
             case WeaponType.Firearm:
-                ActualizarRecarga();
-
-                if (Input.GetKeyDown(KeyCode.R))
-                    IniciarRecarga();
-
-                if (recargando || Time.time < siguienteAtaque) break;
-
-                bool disparar = armaAutomatica ? Input.GetMouseButton(0) : Input.GetMouseButtonDown(0);
-                if (disparar) Disparar();
+                ActualizarArmaDeFuego();
                 break;
         }
+    }
+
+    private void ActualizarMelee()
+    {
+        if (Time.time < siguienteAtaque)
+            return;
+
+        if (Input.GetMouseButtonDown(0))
+            AtaqueMelee();
+    }
+
+    private void ActualizarArmaDeFuego()
+    {
+        ActualizarRecarga();
+
+        if (Input.GetKeyDown(KeyCode.R))
+            IniciarRecarga();
+
+        if (recargando)
+            return;
+
+        if (Time.time < siguienteAtaque)
+            return;
+
+        bool disparar = armaAutomatica
+            ? Input.GetMouseButton(0)
+            : Input.GetMouseButtonDown(0);
+
+        if (disparar)
+            Disparar();
     }
 
     private void AtaqueMelee()
     {
         siguienteAtaque = Time.time + tiempoEntreAtaques;
 
-        // El hitbox se activa siempre por código, con o sin animación asignada.
-        // Así el daño no depende de tener un Animation Event configurado en el clip.
         if (animator != null)
             animator.SetTrigger("Atacar");
 
+        ReproducirSonidoMelee();
+
         ActivarMelee();
+
+        CancelInvoke(nameof(DesactivarMelee));
         Invoke(nameof(DesactivarMelee), tiempoHitbox);
     }
 
@@ -130,7 +167,15 @@ public class WeaponSystem : MonoBehaviour
 
     private void Disparar()
     {
-        if (usarMunicion && municionEnCargador <= 0) return;
+        if (usarMunicion && municionEnCargador <= 0)
+        {
+            ReproducirSonidoSinMunicion();
+
+            if (mostrarLogs)
+                Debug.Log($"{gameObject.name}: No hay munición.");
+
+            return;
+        }
 
         siguienteAtaque = Time.time + tiempoEntreAtaques;
 
@@ -140,50 +185,121 @@ public class WeaponSystem : MonoBehaviour
         if (efectoDisparo != null)
             efectoDisparo.Play();
 
+        ReproducirSonidoDisparo();
+
         for (int i = 0; i < balasPorDisparo; i++)
             CrearBala();
     }
 
     private void CrearBala()
     {
-        if (puntoDisparo == null || PoolManager.Instance == null) return;
+        if (puntoDisparo == null)
+        {
+            if (mostrarLogs)
+                Debug.LogWarning($"{gameObject.name}: No hay PuntoDisparo asignado.");
+
+            return;
+        }
+
+        if (PoolManager.Instance == null)
+        {
+            if (mostrarLogs)
+                Debug.LogWarning($"{gameObject.name}: No existe PoolManager.");
+
+            return;
+        }
 
         if (camaraPrincipal == null)
             camaraPrincipal = Camera.main;
 
-        if (camaraPrincipal == null) return;
+        if (camaraPrincipal == null)
+        {
+            if (mostrarLogs)
+                Debug.LogWarning($"{gameObject.name}: No se encontró la cámara principal.");
+
+            return;
+        }
 
         Ray ray = camaraPrincipal.ViewportPointToRay(centroViewport);
-        Vector3 objetivo = Physics.Raycast(ray, out RaycastHit hit, 1000f)
-            ? hit.point
-            : ray.origin + ray.direction * 1000f;
 
-        Vector3 direccion = (objetivo - puntoDisparo.position).normalized;
+        Vector3 objetivo;
+
+        if (Physics.Raycast(ray, out RaycastHit hit, 1000f))
+        {
+            objetivo = hit.point;
+        }
+        else
+        {
+            objetivo = ray.origin + ray.direction * 1000f;
+        }
+
+        Vector3 direccion = objetivo - puntoDisparo.position;
+
+        if (direccion.sqrMagnitude <= 0.0001f)
+            return;
+
+        direccion.Normalize();
 
         if (dispersion > 0f)
         {
             direccion += new Vector3(
                 Random.Range(-dispersion, dispersion),
                 Random.Range(-dispersion, dispersion),
-                Random.Range(-dispersion, dispersion));
+                Random.Range(-dispersion, dispersion)
+            );
+
             direccion.Normalize();
         }
 
-        GameObject balaObj = PoolManager.Instance.ObtenerObjeto(
-            idPoolBala, puntoDisparo.position, Quaternion.LookRotation(direccion));
+        Quaternion rotacion = Quaternion.LookRotation(direccion);
 
-        if (balaObj == null) return;
+        GameObject balaObj = PoolManager.Instance.ObtenerObjeto(
+            idPoolBala,
+            puntoDisparo.position,
+            rotacion
+        );
+
+        if (balaObj == null)
+        {
+            if (mostrarLogs)
+                Debug.LogWarning(
+                    $"{gameObject.name}: No se pudo obtener una bala del pool '{idPoolBala}'."
+                );
+
+            return;
+        }
 
         if (balaObj.TryGetComponent(out Bala bala))
-            bala.Configurar(danio, velocidadBala, tiempoVidaBala, atravesarEnemigos, disparadoPorJugador: true);
+        {
+            bala.Configurar(
+                danio,
+                velocidadBala,
+                tiempoVidaBala,
+                atravesarEnemigos,
+                disparadoPorJugador: true
+            );
+        }
+        else if (mostrarLogs)
+        {
+            Debug.LogWarning(
+                $"{balaObj.name}: El objeto obtenido del pool no tiene componente Bala."
+            );
+        }
     }
 
-    // Inicia la recarga si hace falta y hay balas en reserva. Dura tiempoRecarga segundos.
     public void IniciarRecarga()
     {
-        if (!usarMunicion || recargando) return;
-        if (municionEnCargador >= tamanoCargador) return;
-        if (municionReserva <= 0) return;
+        if (!usarMunicion)
+            return;
+
+        if (recargando)
+            return;
+
+        if (municionEnCargador >= tamanoCargador)
+            return;
+
+        if (municionReserva <= 0)
+            return;
 
         recargando = true;
         finRecarga = Time.time + tiempoRecarga;
@@ -191,58 +307,250 @@ public class WeaponSystem : MonoBehaviour
         if (animator != null)
             animator.SetTrigger("Recargar");
 
-        if (mostrarLogs) Debug.Log(gameObject.name + " recargando...");
+        ReproducirSonidoRecarga();
+
+        if (mostrarLogs)
+            Debug.Log($"{gameObject.name}: Recargando...");
     }
 
     private void ActualizarRecarga()
     {
-        if (recargando && Time.time >= finRecarga)
+        if (!recargando)
+            return;
+
+        if (Time.time >= finRecarga)
             CompletarRecarga();
     }
 
-    // Transfiere de la reserva solo lo que falta para llenar el cargador.
     private void CompletarRecarga()
     {
         recargando = false;
+
         int faltante = tamanoCargador - municionEnCargador;
-        int transferido = Mathf.Min(faltante, municionReserva);
+
+        int transferido = Mathf.Min(
+            faltante,
+            municionReserva
+        );
+
         municionEnCargador += transferido;
         municionReserva -= transferido;
+
+        if (mostrarLogs)
+        {
+            Debug.Log(
+                $"{gameObject.name}: Recarga completada. " +
+                $"Cargador: {municionEnCargador}/{tamanoCargador}. " +
+                $"Reserva: {municionReserva}/{reservaMaxima}."
+            );
+        }
     }
 
-    // Suma balas a la mochila de esta arma (compras en máquinas), respetando el máximo.
+    private void ReproducirSonidoDisparo()
+    {
+        if (sonidoDisparo == null)
+            return;
+
+        if (AudioManager.Instance == null)
+            return;
+
+        Vector3 posicion = puntoDisparo != null
+            ? puntoDisparo.position
+            : transform.position;
+
+        AudioManager.Instance.ReproducirClip3D(
+            sonidoDisparo,
+            posicion
+        );
+    }
+
+    private void ReproducirSonidoRecarga()
+    {
+        if (sonidoRecarga == null)
+            return;
+
+        if (AudioManager.Instance == null)
+            return;
+
+        Vector3 posicion = transform.position;
+
+        AudioManager.Instance.ReproducirClip3D(
+            sonidoRecarga,
+            posicion
+        );
+    }
+
+    private void ReproducirSonidoSinMunicion()
+    {
+        if (sonidoSinMunicion == null)
+            return;
+
+        if (AudioManager.Instance == null)
+            return;
+
+        Vector3 posicion = transform.position;
+
+        AudioManager.Instance.ReproducirClip3D(
+            sonidoSinMunicion,
+            posicion
+        );
+    }
+
+    private void ReproducirSonidoMelee()
+    {
+        if (sonidoMelee == null)
+            return;
+
+        if (AudioManager.Instance == null)
+            return;
+
+        Vector3 posicion = transform.position;
+
+        AudioManager.Instance.ReproducirClip3D(
+            sonidoMelee,
+            posicion
+        );
+    }
+
     public void AgregarMunicionReserva(int cantidad)
     {
-        municionReserva = Mathf.Min(municionReserva + cantidad, reservaMaxima);
+        if (cantidad <= 0)
+            return;
+
+        municionReserva = Mathf.Min(
+            municionReserva + cantidad,
+            reservaMaxima
+        );
     }
 
-    public float ObtenerDanio() => danio;
-    public WeaponType ObtenerTipoArma() => tipoArma;
-    public TipoMunicion ObtenerTipoMunicion() => tipoMunicion;
-    public int ObtenerMunicionCargador() => municionEnCargador;
-    public int ObtenerTamanoCargador() => tamanoCargador;
-    public int ObtenerMunicionReserva() => municionReserva;
-    public int ObtenerReservaMaxima() => reservaMaxima;
-    public float ObtenerTiempoRecarga() => tiempoRecarga;
+    public float ObtenerDanio()
+    {
+        return danio;
+    }
 
-    public void SubirDano(float cantidad) => danio += cantidad;
+    public WeaponType ObtenerTipoArma()
+    {
+        return tipoArma;
+    }
+
+    public TipoMunicion ObtenerTipoMunicion()
+    {
+        return tipoMunicion;
+    }
+
+    public int ObtenerMunicionCargador()
+    {
+        return municionEnCargador;
+    }
+
+    public int ObtenerTamanoCargador()
+    {
+        return tamanoCargador;
+    }
+
+    public int ObtenerMunicionReserva()
+    {
+        return municionReserva;
+    }
+
+    public int ObtenerReservaMaxima()
+    {
+        return reservaMaxima;
+    }
+
+    public float ObtenerTiempoRecarga()
+    {
+        return tiempoRecarga;
+    }
+
+    public void SubirDano(float cantidad)
+    {
+        if (cantidad <= 0f)
+            return;
+
+        danio += cantidad;
+    }
 
     public void MejorarCadencia(float reduccion)
     {
-        tiempoEntreAtaques = Mathf.Max(0.05f, tiempoEntreAtaques - reduccion);
+        if (reduccion <= 0f)
+            return;
+
+        tiempoEntreAtaques = Mathf.Max(
+            0.05f,
+            tiempoEntreAtaques - reduccion
+        );
     }
 
-    // La mejora de capacidad agranda el cargador (y regala esas balas)
-    // y también sube la reserva máxima según multiplicadorMejoraReserva.
     public void SubirCapacidadMunicion(int cantidad)
     {
+        if (cantidad <= 0)
+            return;
+
         tamanoCargador += cantidad;
         municionEnCargador += cantidad;
-        reservaMaxima += Mathf.RoundToInt(cantidad * multiplicadorMejoraReserva);
+
+        reservaMaxima += Mathf.RoundToInt(
+            cantidad * multiplicadorMejoraReserva
+        );
+
+        municionEnCargador = Mathf.Min(
+            municionEnCargador,
+            tamanoCargador
+        );
+
+        municionReserva = Mathf.Min(
+            municionReserva,
+            reservaMaxima
+        );
     }
 
     public void MejorarVelocidadRecarga(float reduccion)
     {
-        tiempoRecarga = Mathf.Max(0.1f, tiempoRecarga - reduccion);
+        if (reduccion <= 0f)
+            return;
+
+        tiempoRecarga = Mathf.Max(
+            0.1f,
+            tiempoRecarga - reduccion
+        );
+    }
+
+    private void ValidarConfiguracion()
+    {
+        if (tipoArma == WeaponType.Firearm)
+        {
+            if (puntoDisparo == null && mostrarLogs)
+            {
+                Debug.LogWarning(
+                    $"{gameObject.name}: Falta asignar PuntoDisparo."
+                );
+            }
+
+            if (string.IsNullOrWhiteSpace(idPoolBala) && mostrarLogs)
+            {
+                Debug.LogWarning(
+                    $"{gameObject.name}: El ID del pool de bala está vacío."
+                );
+            }
+
+            if (balasPorDisparo < 1)
+                balasPorDisparo = 1;
+
+            if (tamanoCargador < 1)
+                tamanoCargador = 1;
+
+            if (municionEnCargador < 0)
+                municionEnCargador = 0;
+
+            if (municionEnCargador > tamanoCargador)
+                municionEnCargador = tamanoCargador;
+
+            if (municionReserva < 0)
+                municionReserva = 0;
+
+            if (reservaMaxima < 0)
+                reservaMaxima = 0;
+        }
     }
 }

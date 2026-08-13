@@ -1,31 +1,41 @@
 using UnityEngine;
+using UnityEngine.UI;
 
-[RequireComponent(typeof(AudioSource))]
 public class ControladorVolumen : MonoBehaviour
 {
     [SerializeField] private TipoAudio tipoAudio = TipoAudio.Efectos;
-
-    private AudioSource audioSrc;
-    private float volumenActual = -1f;
-    private string claveVolumen;
+    private Slider slider;
 
     private void Awake()
     {
-        claveVolumen = tipoAudio == TipoAudio.Efectos ? "VolumenSonidos" : "VolumenMusica";
+        slider = GetComponent<Slider>();
     }
 
     private void Start()
     {
-        audioSrc = GetComponent<AudioSource>();
-        volumenActual = PlayerPrefs.GetFloat(claveVolumen, 1f);
-        audioSrc.volume = volumenActual;
+        if (slider == null) return;
+
+        float volumenGuardado = (tipoAudio == TipoAudio.Efectos)
+            ? PlayerPrefs.GetFloat("VolumenSonidos", 1f)
+            : PlayerPrefs.GetFloat("VolumenMusica", 1f);
+
+        slider.value = volumenGuardado;
+        slider.onValueChanged.AddListener(AplicarCambioVolumen);
     }
 
-    // Llamar desde el slider de ajustes cuando el usuario cambie el volumen.
-    public void AplicarVolumen(float nuevoVolumen)
+    private void OnDestroy()
     {
-        volumenActual = nuevoVolumen;
-        audioSrc.volume = volumenActual;
-        PlayerPrefs.SetFloat(claveVolumen, volumenActual);
+        if (slider != null)
+            slider.onValueChanged.RemoveListener(AplicarCambioVolumen);
+    }
+
+    public void AplicarCambioVolumen(float valor)
+    {
+        if (AudioManager.Instance == null) return;
+
+        if (tipoAudio == TipoAudio.Efectos)
+            AudioManager.Instance.AjustarVolumenEfectos(valor);
+        else
+            AudioManager.Instance.AjustarVolumenMusica(valor);
     }
 }

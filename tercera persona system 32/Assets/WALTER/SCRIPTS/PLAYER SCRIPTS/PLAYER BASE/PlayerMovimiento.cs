@@ -8,8 +8,9 @@ public class PlayerMovimiento : MonoBehaviour
     [SerializeField] private float velocidadCorrer = 7f;
 
     [Header("Salto")]
-    [Tooltip("Desmarca esto si el juego no necesita saltar. La gravedad sigue aplicándose igual (para caídas), solo se bloquea la tecla de salto.")]
+    [Tooltip("Activa el salto si el personaje puede saltar.")]
     [SerializeField] private bool permitirSalto = false;
+
     [SerializeField] private float fuerzaSalto = 5f;
     [SerializeField] private float gravedad = -20f;
 
@@ -22,113 +23,287 @@ public class PlayerMovimiento : MonoBehaviour
     [SerializeField] private bool controlesBloqueados;
 
     [Header("Animación")]
-    [Tooltip("Suaviza la transición entre valores de movimiento en el Blend Tree (segundos). 0 = respuesta instantánea, más alto = más suave pero menos preciso.")]
-    [SerializeField] private float suavizadoAnimacion = 0.1f;
+    [SerializeField] private Animator animator;
+
+    [Tooltip("Nombre exacto del estado Idle dentro del Animator.")]
+    [SerializeField] private string estadoIdle = "Idle";
+
+    [Tooltip("Nombre exacto del estado de caminar hacia adelante.")]
+    [SerializeField] private string estadoCaminarAdelante = "CaminarAdelante";
+
+    [Tooltip("Nombre exacto del estado de caminar hacia la izquierda.")]
+    [SerializeField] private string estadoCaminarIzquierda = "CaminarIzquierda";
+
+    [Tooltip("Velocidad de reproducción de la animación de caminar hacia adelante.")]
+    [SerializeField] private float velocidadAnimacionAdelante = 1f;
+
+    [Tooltip("Velocidad de reproducción de la animación lateral.")]
+    [SerializeField] private float velocidadAnimacionLateral = 1f;
+
+    [Tooltip("Tiempo utilizado para cambiar suavemente entre estados de animación.")]
+    [SerializeField] private float duracionTransicionAnimacion = 0.15f;
+
+    [Header("Orientación")]
+    [Tooltip("Si está activado, el personaje gira automáticamente hacia la dirección del movimiento.")]
+    [SerializeField] private bool girarConMovimiento = false;
+
+    [Tooltip("Velocidad de giro del personaje.")]
+    [SerializeField] private float velocidadGiro = 10f;
 
     public bool EstaMuerto { get; private set; }
 
     private CharacterController controller;
-    private Animator animator;
+
     private Vector3 velocidadVertical;
+
     private bool isGrounded;
     private bool corriendo;
+
     private float estaminaActual;
 
-    // VelocidadX = movimiento lateral (izquierda/derecha), VelocidadZ = adelante/atrás.
-    // Separarlos en dos ejes permite que el Blend Tree del Animator reutilice el
-    // mismo clip para adelante y atrás (reproducido al revés) y otro distinto
-    // para los lados, en vez de un solo valor de velocidad "sin dirección".
-    private static readonly int AnimVelocidadX = Animator.StringToHash("VelocidadX");
-    private static readonly int AnimVelocidadZ = Animator.StringToHash("VelocidadZ");
-    private static readonly int AnimCorriendo = Animator.StringToHash("Corriendo");
-    private static readonly int AnimSaltar = Animator.StringToHash("Saltar");
-    private static readonly int AnimMuerte = Animator.StringToHash("Muerte");
+    private int hashEstadoActual;
 
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
-        animator = GetComponent<Animator>();
+
+        if (animator == null)
+            animator = GetComponent<Animator>();
+
         estaminaActual = estaminaMax;
+
+        ValidarConfiguracion();
     }
 
     private void Update()
     {
-        if (Time.timeScale == 0 || controlesBloqueados || EstaMuerto) return;
+        if (Time.timeScale == 0f)
+            return;
+
+        if (EstaMuerto)
+        {
+            AplicarGravedad();
+            return;
+        }
+
+        if (controlesBloqueados)
+        {
+            AplicarGravedad();
+            return;
+        }
 
         RevisarSuelo();
-        Movimiento();
-        ManejarSalto();
-        AplicarGravedad();
+
         ManejarCorrer();
+
+        Movimiento();
+
+        ManejarSalto();
+
+        AplicarGravedad();
     }
 
     private void Movimiento()
     {
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
+        float x = Input.GetAxisRaw("Horizontal");
+        float z = Input.GetAxisRaw("Vertical");
 
-        float velocidad = corriendo ? velocidadCorrer : velocidadCaminar;
-        Vector3 direccion = transform.right * x + transform.forward * z;
-        controller.Move(direccion.normalized * velocidad * Time.deltaTime);
+        Vector3 direccion =
+            transform.right * x +
+            transform.forward * z;
 
-        if (animator != null)
+        if (direccion.sqrMagnitude > 1f)
+            direccion.Normalize();
+
+        float velocidad =
+            corriendo
+                ? velocidadCorrer
+                : velocidadCaminar;
+
+        controller.Move(
+            direccion *
+            velocidad *
+            Time.deltaTime
+        );
+
+        ActualizarAnimacion(x, z);
+
+        if (girarConMovimiento && direccion.sqrMagnitude > 0.001f)
+            GirarHaciaMovimiento(direccion);
+    }
+
+    private void ActualizarAnimacion(float x, float z)
+    {
+        if (animator == null)
+            return;
+
+        bool seEstaMoviendo =
+            Mathf.Abs(x) > 0.01f ||
+            Mathf.Abs(z) > 0.01f;
+
+        if (!seEstaMoviendo)
         {
-            // SetFloat con dampTime suaviza la mezcla del Blend Tree en vez de
-            // saltar bruscamente entre direcciones cada vez que cambia el input.
-            animator.SetFloat(AnimVelocidadX, x, suavizadoAnimacion, Time.deltaTime);
-            animator.SetFloat(AnimVelocidadZ, z, suavizadoAnimacion, Time.deltaTime);
-            animator.SetBool(AnimCorriendo, corriendo);
+            ReproducirEstado(
+                estadoIdle,
+                1f
+            );
+
+            return;
         }
+
+        if (Mathf.Abs(z) >= Mathf.Abs(x))
+        {
+            ReproducirEstado(
+                estadoCaminarAdelante,
+                z >= 0f
+                    ? velocidadAnimacionAdelante
+                    : velocidadAnimacionAdelante
+            );
+        }
+        else
+        {
+            ReproducirEstado(
+                estadoCaminarIzquierda,
+                velocidadAnimacionLateral
+            );
+        }
+    }
+
+    private void ReproducirEstado(
+        string nombreEstado,
+        float velocidadAnimacion)
+    {
+        if (string.IsNullOrEmpty(nombreEstado))
+            return;
+
+        int hashEstado =
+            Animator.StringToHash(nombreEstado);
+
+        if (hashEstadoActual != hashEstado)
+        {
+            animator.CrossFade(
+                hashEstado,
+                duracionTransicionAnimacion
+            );
+
+            hashEstadoActual = hashEstado;
+        }
+
+        animator.speed = Mathf.Max(
+            0.01f,
+            velocidadAnimacion
+        );
+    }
+
+    private void GirarHaciaMovimiento(Vector3 direccion)
+    {
+        if (direccion.sqrMagnitude <= 0.001f)
+            return;
+
+        Quaternion rotacionObjetivo =
+            Quaternion.LookRotation(direccion);
+
+        transform.rotation =
+            Quaternion.Slerp(
+                transform.rotation,
+                rotacionObjetivo,
+                velocidadGiro * Time.deltaTime
+            );
     }
 
     private void RevisarSuelo()
     {
-        // CharacterController ya calcula el contacto con el suelo al llamar a Move().
-        // Se lee aquí, antes de mover en este frame, para saber si al terminar el
-        // frame anterior el jugador estaba tocando el suelo (usado para saltar y
-        // para frenar la caída). Evita depender de un Transform + LayerMask aparte
-        // que puede quedar sin asignar o romperse si se borra el objeto.
         isGrounded = controller.isGrounded;
-        if (isGrounded && velocidadVertical.y < 0)
+
+        if (isGrounded && velocidadVertical.y < 0f)
             velocidadVertical.y = -2f;
     }
 
     private void ManejarSalto()
     {
-        if (!permitirSalto) return;
+        if (!permitirSalto)
+            return;
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if (!isGrounded)
+            return;
+
+        if (!Input.GetKeyDown(KeyCode.Space))
+            return;
+
+        velocidadVertical.y =
+            Mathf.Sqrt(
+                fuerzaSalto *
+                -2f *
+                gravedad
+            );
+
+        if (animator != null)
         {
-            velocidadVertical.y = Mathf.Sqrt(fuerzaSalto * -2f * gravedad);
-            if (animator != null) animator.SetTrigger(AnimSaltar);
+            animator.SetTrigger(
+                "Saltar"
+            );
         }
     }
 
     private void AplicarGravedad()
     {
-        velocidadVertical.y += gravedad * Time.deltaTime;
-        controller.Move(velocidadVertical * Time.deltaTime);
+        velocidadVertical.y +=
+            gravedad *
+            Time.deltaTime;
+
+        controller.Move(
+            velocidadVertical *
+            Time.deltaTime
+        );
     }
 
     private void ManejarCorrer()
     {
-        bool intentaCorrer = Input.GetKey(KeyCode.LeftShift)
-            && estaminaActual > 0
-            && Input.GetAxisRaw("Vertical") > 0;
+        bool intentaCorrer =
+            Input.GetKey(KeyCode.LeftShift) &&
+            estaminaActual > 0f &&
+            Input.GetAxisRaw("Vertical") > 0f;
 
         corriendo = intentaCorrer;
 
-        estaminaActual += intentaCorrer
-            ? -consumoEstamina * Time.deltaTime
-            : regeneracionEstamina * Time.deltaTime;
+        if (intentaCorrer)
+        {
+            estaminaActual -=
+                consumoEstamina *
+                Time.deltaTime;
+        }
+        else
+        {
+            estaminaActual +=
+                regeneracionEstamina *
+                Time.deltaTime;
+        }
 
-        estaminaActual = Mathf.Clamp(estaminaActual, 0f, estaminaMax);
+        estaminaActual =
+            Mathf.Clamp(
+                estaminaActual,
+                0f,
+                estaminaMax
+            );
+
+        if (estaminaActual <= 0f)
+            corriendo = false;
     }
 
-    public float ObtenerPorcentajeEstamina() => estaminaActual / estaminaMax;
+    public float ObtenerPorcentajeEstamina()
+    {
+        if (estaminaMax <= 0f)
+            return 0f;
+
+        return estaminaActual /
+               estaminaMax;
+    }
 
     public void SubirVelocidad(float cantidad)
     {
+        if (cantidad <= 0f)
+            return;
+
         velocidadCaminar += cantidad;
         velocidadCorrer += cantidad;
     }
@@ -136,13 +311,79 @@ public class PlayerMovimiento : MonoBehaviour
     public void BloquearControles(bool estado)
     {
         controlesBloqueados = estado;
+
+        if (estado)
+        {
+            corriendo = false;
+
+            if (animator != null)
+            {
+                ReproducirEstado(
+                    estadoIdle,
+                    1f
+                );
+            }
+        }
     }
 
     public void Morir()
     {
-        if (EstaMuerto) return;
+        if (EstaMuerto)
+            return;
+
         EstaMuerto = true;
         controlesBloqueados = true;
-        if (animator != null) animator.SetTrigger(AnimMuerte);
+        corriendo = false;
+
+        if (animator != null)
+        {
+            animator.speed = 1f;
+
+            animator.SetTrigger(
+                "Muerte"
+            );
+        }
+    }
+
+    public bool EstaCorriendo()
+    {
+        return corriendo;
+    }
+
+    public float ObtenerEstaminaActual()
+    {
+        return estaminaActual;
+    }
+
+    public float ObtenerEstaminaMaxima()
+    {
+        return estaminaMax;
+    }
+
+    private void ValidarConfiguracion()
+    {
+        if (estaminaMax < 0f)
+            estaminaMax = 0f;
+
+        if (estaminaActual > estaminaMax)
+            estaminaActual = estaminaMax;
+
+        if (velocidadCaminar < 0f)
+            velocidadCaminar = 0f;
+
+        if (velocidadCorrer < 0f)
+            velocidadCorrer = 0f;
+
+        if (velocidadGiro < 0f)
+            velocidadGiro = 0f;
+
+        if (duracionTransicionAnimacion < 0f)
+            duracionTransicionAnimacion = 0f;
+
+        if (velocidadAnimacionAdelante <= 0f)
+            velocidadAnimacionAdelante = 1f;
+
+        if (velocidadAnimacionLateral <= 0f)
+            velocidadAnimacionLateral = 1f;
     }
 }

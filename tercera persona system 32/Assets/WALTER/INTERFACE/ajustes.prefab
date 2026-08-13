@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 624491299406243328}
   - component: {fileID: 8765646804902378692}
+  - component: {fileID: 1590495044286382626}
   m_Layer: 5
   m_Name: Volum Sonidos
   m_TagString: Untagged
@@ -102,6 +103,19 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1590495044286382626
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 65703705238068423}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df6e6d48e2ec48d4c939d307c6cb2688, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ControladorVolumen
+  tipoAudio: 0
 --- !u!1 &448994215445331758
 GameObject:
   m_ObjectHideFlags: 0
@@ -262,6 +276,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1455713043083697941}
   - component: {fileID: 7328590401664353909}
+  - component: {fileID: 6540790762467612084}
   m_Layer: 5
   m_Name: Volum Musica
   m_TagString: Untagged
@@ -354,6 +369,19 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &6540790762467612084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 919938128927522847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df6e6d48e2ec48d4c939d307c6cb2688, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ControladorVolumen
+  tipoAudio: 1
 --- !u!1 &1110257686992986076
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,5 +1,3 @@
-// Editor personalizado de WeaponSystem.
-// IMPORTANTE: este archivo debe vivir en una carpeta "Editor" para no incluirse en el build.
 using UnityEditor;
 using UnityEngine;
 
@@ -10,43 +8,85 @@ public class WeaponSystemEditor : Editor
     {
         serializedObject.Update();
 
-        SerializedProperty tipoArma = serializedObject.FindProperty("tipoArma");
+        SerializedProperty tipoArma =
+            serializedObject.FindProperty("tipoArma");
+
         EditorGUILayout.PropertyField(tipoArma);
 
         GUILayout.Space(10);
-        EditorGUILayout.LabelField("Configuración General", EditorStyles.boldLabel);
+
+        EditorGUILayout.LabelField(
+            "Configuración General",
+            EditorStyles.boldLabel
+        );
+
         Campo("danio");
         Campo("tiempoEntreAtaques");
 
-        WeaponType tipo = (WeaponType)tipoArma.enumValueIndex;
         GUILayout.Space(10);
+
+        EditorGUILayout.LabelField(
+            "Audio",
+            EditorStyles.boldLabel
+        );
+
+        Campo("sonidoDisparo");
+        Campo("sonidoRecarga");
+        Campo("sonidoSinMunicion");
+        Campo("sonidoMelee");
+
+        GUILayout.Space(10);
+
+        WeaponType tipo =
+            (WeaponType)tipoArma.enumValueIndex;
 
         switch (tipo)
         {
             case WeaponType.Melee:
-                EditorGUILayout.LabelField("Configuración Melee", EditorStyles.boldLabel);
+
+                EditorGUILayout.LabelField(
+                    "Configuración Melee",
+                    EditorStyles.boldLabel
+                );
+
                 Campo("meleeTrigger");
                 Campo("animator");
                 Campo("tiempoHitbox");
+
                 break;
 
             case WeaponType.Firearm:
-                EditorGUILayout.LabelField("Configuración Arma de Fuego", EditorStyles.boldLabel);
+
+                EditorGUILayout.LabelField(
+                    "Configuración Arma de Fuego",
+                    EditorStyles.boldLabel
+                );
+
                 Campo("armaAutomatica");
 
                 GUILayout.Space(5);
-                EditorGUILayout.LabelField("Munición", EditorStyles.boldLabel);
+
+                EditorGUILayout.LabelField(
+                    "Munición",
+                    EditorStyles.boldLabel
+                );
+
                 Campo("usarMunicion");
                 Campo("tipoMunicion");
                 Campo("municionEnCargador");
                 Campo("tamanoCargador");
                 Campo("municionReserva");
                 Campo("reservaMaxima");
-                Campo("tiempoRecarga");
                 Campo("multiplicadorMejoraReserva");
+                Campo("tiempoRecarga");
 
                 GUILayout.Space(5);
-                EditorGUILayout.LabelField("Configuración Bala", EditorStyles.boldLabel);
+
+                EditorGUILayout.LabelField(
+                    "Configuración Bala",
+                    EditorStyles.boldLabel
+                );
+
                 Campo("idPoolBala");
                 Campo("puntoDisparo");
                 Campo("velocidadBala");
@@ -55,11 +95,17 @@ public class WeaponSystemEditor : Editor
                 Campo("dispersion");
                 Campo("atravesarEnemigos");
                 Campo("efectoDisparo");
+
                 break;
         }
 
         GUILayout.Space(10);
-        EditorGUILayout.LabelField("Debug", EditorStyles.boldLabel);
+
+        EditorGUILayout.LabelField(
+            "Debug",
+            EditorStyles.boldLabel
+        );
+
         Campo("mostrarLogs");
 
         serializedObject.ApplyModifiedProperties();
@@ -67,7 +113,9 @@ public class WeaponSystemEditor : Editor
 
     private void Campo(string nombrePropiedad)
     {
-        SerializedProperty propiedad = serializedObject.FindProperty(nombrePropiedad);
+        SerializedProperty propiedad =
+            serializedObject.FindProperty(nombrePropiedad);
+
         if (propiedad != null)
             EditorGUILayout.PropertyField(propiedad);
     }

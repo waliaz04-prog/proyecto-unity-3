@@ -19,171 +19,148 @@ public class EnemigoNave : EnemyBase
     [SerializeField] private Transform modeloVisual;
     [SerializeField] private float alturaVisual = 10f;
 
-    [Header("Giro Visual (efecto platillo volador)")]
-    [Tooltip("Grados por segundo. El modelo gira todo el tiempo sobre su propio eje, independiente de hacia dónde se mueve la nave.")]
+    [Header("Giro Visual (Efecto Platillo Volador)")]
+    [Tooltip("Grados por segundo. El modelo gira todo el tiempo sobre su propio eje.")]
     [SerializeField] private float velocidadGiroVisual = 90f;
-    [Tooltip("Eje local del modelo sobre el que gira (normalmente Y = arriba)")]
     [SerializeField] private Vector3 ejeGiroVisual = Vector3.up;
 
     [Header("Spawn Enemigos")]
     [SerializeField] private string idPoolAlien = "alien";
     [SerializeField] private Transform puntoSpawn;
     [SerializeField] private float tiempoAntesGenerar = 10f;
-    [SerializeField] private float tiempoEntreSpawns = 5f;
-    [SerializeField] private int maximoAliensPorNave = 10;
-    [SerializeField] private int maximoAliensGlobales = 100;
-
-    [Header("NavMesh")]
-    [SerializeField] private float radioBusquedaNavMesh = 10f;
+    [SerializeField] private float tiempoEntreSpawns = 2f;
+    [SerializeField] private int maxAliensPorNave = 5;
+    [SerializeField] private int maxAliensGlobales = 20;
+    [SerializeField] private float radioBusquedaNavMesh = 5f;
 
     [Header("Debug")]
     [SerializeField] private bool mostrarLogs = false;
     [SerializeField] private bool mostrarGizmos = true;
 
+    private static int aliensActivosGlobal = 0;
+
     private NavMeshAgent agent;
     private AtaqueEnemigo ataqueEnemigo;
+
     private Vector3 destinoActual;
     private float timerDestino;
     private int aliensGenerados;
+    private Coroutine rutinaSpawn;
 
-    // Contador de instancia en lugar de static para evitar bugs al reusar desde pool.
-    // El conteo global se gestiona a través de suscripción/desuscripción en CrearAlien.
-    private static int aliensActivosGlobal;
-
-    protected override void Awake()
-    {
-        agent = GetComponent<NavMeshAgent>();
-        ataqueEnemigo = GetComponent<AtaqueEnemigo>();
-        ConfigurarAgente();
-        base.Awake(); // busca el jugador en caché estático
-        if (jugador != null)
-            ataqueEnemigo?.ConfigurarObjetivo(jugador);
-    }
-
-    private void OnEnable()
-    {
-        aliensGenerados = 0;
-        VerificarNavMesh();
-        GenerarNuevoDestino();
-        StartCoroutine(RutinaSpawn());
-    }
-
-    private void OnDisable()
-    {
-        StopAllCoroutines();
-    }
-
-    private void Update()
-    {
-        if (!TieneJugador()) return;
-
-        if (!agent.isOnNavMesh) return;
-
-        float distanciaJugador = Vector3.Distance(transform.position, jugador.position);
-
-        if (distanciaJugador <= distanciaDeteccion)
-        {
-            SeguirJugador();
-            if (distanciaJugador <= distanciaAtaque)
-                AtacarJugador();
-        }
-        else
-        {
-            Patrullar();
-        }
-
-        Rotar();
-        ActualizarAlturaVisual();
-        GirarModeloVisual();
-    }
-
-    private void ConfigurarAgente()
-    {
-        // speed y acceleration los controla StatsEnemigo
-        agent.updateRotation = false;
-        agent.updateUpAxis = false;
-    }
-
-    // Llamar desde SceneInitializer al cargar una escena nueva para limpiar el pool de naves.
     public static void ResetearContadorGlobal()
     {
         aliensActivosGlobal = 0;
     }
 
-    private void VerificarNavMesh()
+    protected override void Awake()
     {
-        if (agent.isOnNavMesh) return;
-        if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 20f, NavMesh.AllAreas))
-            agent.Warp(hit.position);
+        agent = GetComponent<NavMeshAgent>();
+        ataqueEnemigo = GetComponent<AtaqueEnemigo>();
+
+        if (agent != null)
+        {
+            agent.updateRotation = false;
+        }
+
+        base.Awake();
     }
 
-    private void Patrullar()
+    private void OnEnable()
     {
-        if (zonaVuelo == null) return;
+        aliensGenerados = 0;
+        timerDestino = 0f;
+
+        if (zonaVuelo != null)
+        {
+            destinoActual = zonaVuelo.ObtenerPuntoAleatorio();
+        }
+
+        rutinaSpawn = StartCoroutine(RutinaSpawnAliens());
+    }
+
+    private void OnDisable()
+    {
+        if (rutinaSpawn != null)
+        {
+            StopCoroutine(rutinaSpawn);
+            rutinaSpawn = null;
+        }
+    }
+
+    private void Update()
+    {
+        RotarModeloVisual();
+
+        if (!TieneJugador()) return;
+
+        ManejarMovimiento();
+        RotarHaciaTarget();
+    }
+
+    private void RotarModeloVisual()
+    {
+        if (modeloVisual != null)
+        {
+            modeloVisual.Rotate(ejeGiroVisual * (velocidadGiroVisual * Time.deltaTime), Space.Self);
+        }
+    }
+
+    private void ManejarMovimiento()
+    {
+        if (agent == null || !agent.isOnNavMesh) return;
 
         timerDestino += Time.deltaTime;
-        float distancia = Vector3.Distance(transform.position, destinoActual);
 
-        if (distancia <= distanciaNuevoDestino || timerDestino >= tiempoMaximoDestino)
-            GenerarNuevoDestino();
+        float distSqr = (destinoActual - transform.position).sqrMagnitude;
+        float distDestinoSqr = distanciaNuevoDestino * distanciaNuevoDestino;
+
+        if (distSqr <= distDestinoSqr || timerDestino >= tiempoMaximoDestino)
+        {
+            ObtenerNuevoDestino();
+        }
 
         agent.SetDestination(destinoActual);
     }
 
-    private void GenerarNuevoDestino()
+    private void ObtenerNuevoDestino()
     {
         timerDestino = 0f;
-        Vector3 punto = zonaVuelo.ObtenerPuntoAleatorio();
-        if (NavMesh.SamplePosition(punto, out NavMeshHit hit, radioBusquedaNavMesh, NavMesh.AllAreas))
-            destinoActual = hit.position;
+
+        if (zonaVuelo != null)
+        {
+            destinoActual = zonaVuelo.ObtenerPuntoAleatorio();
+        }
+        else if (jugador != null)
+        {
+            Vector3 offsetAleatorio = Random.insideUnitSphere * distanciaAtaque;
+            offsetAleatorio.y = 0f;
+            destinoActual = jugador.position + offsetAleatorio;
+        }
     }
 
-    private void SeguirJugador()
+    private void RotarHaciaTarget()
     {
-        agent.SetDestination(jugador.position);
-    }
+        if (jugador == null) return;
 
-    private void Rotar()
-    {
-        Vector3 direccion = agent.velocity;
+        Vector3 direccion = jugador.position - transform.position;
         direccion.y = 0f;
+
         if (direccion.sqrMagnitude < 0.01f) return;
 
         Quaternion rotacionObjetivo = Quaternion.LookRotation(direccion);
         transform.rotation = Quaternion.Slerp(transform.rotation, rotacionObjetivo, velocidadRotacion * Time.deltaTime);
     }
 
-    private void ActualizarAlturaVisual()
-    {
-        if (modeloVisual == null) return;
-        Vector3 posicion = modeloVisual.localPosition;
-        posicion.y = alturaVisual;
-        modeloVisual.localPosition = posicion;
-    }
-
-    // Gira el modelo sobre su propio eje sin afectar hacia dónde apunta la nave
-    // (eso lo controla Rotar() sobre el transform padre). Da la ilusión visual
-    // de un platillo volador girando mientras se desplaza en cualquier dirección.
-    private void GirarModeloVisual()
-    {
-        if (modeloVisual == null || velocidadGiroVisual == 0f) return;
-        modeloVisual.Rotate(ejeGiroVisual, velocidadGiroVisual * Time.deltaTime, Space.Self);
-    }
-
-    private void AtacarJugador()
-    {
-        if (ataqueEnemigo != null)
-            ataqueEnemigo.IntentarAtacar();
-    }
-
-    private IEnumerator RutinaSpawn()
+    private IEnumerator RutinaSpawnAliens()
     {
         yield return new WaitForSeconds(tiempoAntesGenerar);
 
         while (true)
         {
-            if (aliensGenerados < maximoAliensPorNave && aliensActivosGlobal < maximoAliensGlobales)
+            if (aliensGenerados < maxAliensPorNave && aliensActivosGlobal < maxAliensGlobales)
+            {
                 CrearAlien();
+            }
 
             yield return new WaitForSeconds(tiempoEntreSpawns);
         }
@@ -202,19 +179,21 @@ public class EnemigoNave : EnemyBase
         aliensGenerados++;
         aliensActivosGlobal++;
 
-        ControladorEnemigo controlador = alien.GetComponent<ControladorEnemigo>();
-        if (controlador != null)
+        if (alien.TryGetComponent(out ControladorEnemigo controlador))
         {
-            // ControladorEnemigo limpia sus suscripciones en OnDisable,
-            // así que no quedan suscripciones fantasma al reusar del pool.
             controlador.OnEnemyDeath += ReducirContador;
         }
 
-        if (mostrarLogs) Debug.Log("Alien generado por nave");
+        if (mostrarLogs) Debug.Log("Alien generado por nave.");
     }
 
     private void ReducirContador(ControladorEnemigo controlador)
     {
+        if (controlador != null)
+        {
+            controlador.OnEnemyDeath -= ReducirContador;
+        }
+
         aliensActivosGlobal--;
         if (aliensActivosGlobal < 0) aliensActivosGlobal = 0;
     }
@@ -222,8 +201,10 @@ public class EnemigoNave : EnemyBase
     private void OnDrawGizmosSelected()
     {
         if (!mostrarGizmos) return;
+
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, distanciaDeteccion);
+
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, distanciaAtaque);
     }
